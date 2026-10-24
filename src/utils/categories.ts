@@ -176,10 +176,21 @@ export const DEFAULT_RULES: Rule[] = [
     createdAt: new Date().toISOString(),
   },
 
-  // 6. Transports, Voyages, Mobilité & Gares
+  // 5b. Livraison de repas (Uber Eats, Deliveroo) - Priorité haute avant Transports
+  {
+    id: 'rule_food_delivery',
+    pattern: 'uber\\s*\\*?\\s*eats|deliveroo',
+    isRegex: true,
+    categoryId: 'restaurants',
+    targetMerchantName: 'Uber Eats',
+    priority: 89,
+    createdAt: new Date().toISOString(),
+  },
+
+  // 6. Transports, Voyages, Mobilité & Gares (Uber VTC excluant Uber Eats)
   {
     id: 'rule_transports_mobility',
-    pattern: 'sncf|ratp|navigo|trainline|idtgv|ter |ouigo|tcl|transports en commun|spl relation|uber|ubr\\*|bolt|lime|tier|dott|voi|pony|bicing|total|shell|bp|peage|aprr|vinci autoroutes|esso|air france|transavia|easyjet|ryanair|lufthansa|vueling|relay|relais h|aix-marseille|wagon-lit|wagons-lits|part-dieu|aeroport|orly|horodateur|metro|areas portugal|concessions gares',
+    pattern: 'sncf|ratp|navigo|trainline|idtgv|ter |ouigo|tcl|transports en commun|spl relation|uber(?!.*eats)|ubr\\*(?!.*eats)|bolt|lime|tier|dott|voi|pony|bicing|total|shell|bp|peage|aprr|vinci autoroutes|esso|air france|transavia|easyjet|ryanair|lufthansa|vueling|relais h|aix-marseille|wagon-lit|wagons-lits|part-dieu|aeroport|orly|horodateur|metro|areas portugal|concessions gares',
     isRegex: true,
     categoryId: 'transports',
     priority: 85,
