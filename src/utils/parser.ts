@@ -1,6 +1,7 @@
 import * as XLSX from 'xlsx';
 import type { Transaction, AccountInfo, Rule, TransactionType } from '../types';
 import { DEFAULT_RULES } from './categories';
+import { categorizeTransaction, extractCleanMerchant } from './rules';
 
 const MONTH_NAMES_FR = [
   'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
@@ -8,119 +9,28 @@ const MONTH_NAMES_FR = [
 ];
 
 /**
- * Clean up French bank label to extract human readable merchant name
- */
-export function extractCleanMerchant(rawLabel: string): string {
-  if (!rawLabel) return 'Inconnu';
-  const label = rawLabel.trim();
-
-  // Pattern 1: Crédit Agricole suffix pattern: "... - Clean Merchant Name"
-  // e.g. "Paiement par carte - X5912 CARREFOUR CITY PARIS 22/10 - Carrefour City" -> "Carrefour City"
-  // e.g. "Paiement par carte - X5912 MK MAIL SARL PARIS 22/10 - Victoris" -> "Victoris"
-  const parts = label.split(/\s+-\s+/);
-  if (parts.length >= 3) {
-    const lastPart = parts[parts.length - 1].trim();
-    // Verify it doesn't look like an arbitrary code or date
-    if (lastPart.length > 1 && !/^\d+$/.test(lastPart) && !lastPart.startsWith('Votre abonnement')) {
-      return lastPart;
-    }
-  }
-
-  // Pattern 2: "Prélèvement - ORANGE SA-ORANGE - Orange - Votre abonnement mobile..." -> "Orange"
-  if (label.startsWith('Prélèvement -')) {
-    if (parts.length >= 3 && parts[2]) {
-      return parts[2].trim();
-    }
-    if (parts.length >= 2 && parts[1]) {
-      return parts[1].trim();
-    }
-  }
-
-  // Pattern 3: "Virement en votre faveur - DE M. PELONG ARTHUR" -> "Virement de Arthur Pelong"
-  if (label.includes('Virement') && (label.includes('PELONG ARTHUR') || label.includes('PELONG'))) {
-    return 'Virement interne (Pelong Arthur)';
-  }
-
-  // Pattern 4: "Virement en votre faveur - remboursement cadeau Charles M. - ..." -> "Remboursement cadeau Charles M."
-  if (label.startsWith('Virement en votre faveur -')) {
-    if (parts.length >= 2 && parts[1]) {
-      const sub = parts[1].replace(/^DE\s+/i, '').replace(/^VIR INST de\s+/i, '').trim();
-      return `Virement: ${sub}`;
-    }
-  }
-
-  // Pattern 5: "Paiement par carte - X5912 <NOM> <VILLE> <DATE>"
-  const cardMatch = label.match(/Paiement par carte\s*-\s*X\d+\s+([A-Z0-9\s*.'-]+?)(?:\s+\d{2}\/\d{2}|$)/i);
-  if (cardMatch && cardMatch[1]) {
-    const rawMerchant = cardMatch[1].trim();
-    if (rawMerchant.length > 2) {
-      return rawMerchant;
-    }
-  }
-
-  // Fallback: first 35 chars
-  return label.length > 35 ? label.slice(0, 32) + '...' : label;
-}
-
-/**
- * Apply deterministic rules to a transaction
- */
-export function categorizeTransaction(
-  label: string,
-  type: TransactionType,
-  cleanMerchant: string,
-  rules: Rule[] = DEFAULT_RULES
-): { category: string; method: 'rule' | 'default'; ruleId?: string; overrideMerchant?: string } {
-  const normalizedText = `${label} ${cleanMerchant}`.toLowerCase();
-
-  // Sort rules by priority descending
-  const sortedRules = [...rules].sort((a, b) => (b.priority || 0) - (a.priority || 0));
-
-  for (const rule of sortedRules) {
-    // Debits can never match revenus rules
-    if (rule.categoryId === 'revenus' && type !== 'credit') {
-      continue;
-    }
-
-    let matches = false;
-    if (rule.isRegex) {
-      try {
-        const re = new RegExp(rule.pattern, 'i');
-        matches = re.test(normalizedText);
-      } catch {
-        // Fallback to substring
-        matches = normalizedText.includes(rule.pattern.toLowerCase());
-      }
-    } else {
-      matches = normalizedText.includes(rule.pattern.toLowerCase());
-    }
-
-    if (matches) {
-      return {
-        category: rule.categoryId,
-        method: 'rule',
-        ruleId: rule.id,
-        overrideMerchant: rule.targetMerchantName,
-      };
-    }
-  }
-
-  // Default fallbacks based on type
-  if (type === 'credit') {
-    return { category: 'revenus', method: 'default' };
-  }
-  return { category: 'autre', method: 'default' };
-}
-
-/**
  * Parse an Excel file (XLSX, XLS) or CSV buffer
  */
-export function parseBankStatement(fileData: ArrayBuffer | Uint8Array): {
+export function parseBankStatement(fileData: ArrayBuffer | Uint8Array, rules: Rule[] = DEFAULT_RULES): {
   transactions: Transaction[];
   accountInfo: AccountInfo;
 } {
-  const data = fileData instanceof ArrayBuffer ? new Uint8Array(fileData) : fileData;
-  const workbook = XLSX.read(data, { type: 'array' });
+  const bytes = fileData instanceof ArrayBuffer ? new Uint8Array(fileData) : fileData;
+  // .xlsx is a zip (PK), .xls an OLE file; anything else is treated as CSV text.
+  const binary = (bytes[0] === 0x50 && bytes[1] === 0x4b) || (bytes[0] === 0xd0 && bytes[1] === 0xcf);
+  let workbook: XLSX.WorkBook;
+  if (binary) {
+    workbook = XLSX.read(bytes, { type: 'array', cellDates: true });
+  } else {
+    // French bank CSVs are UTF-8 or Windows-1252; raw keeps "05/10/2026" and "12,50" as written.
+    let text: string;
+    try {
+      text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+    } catch {
+      text = new TextDecoder('windows-1252').decode(bytes);
+    }
+    workbook = XLSX.read(text.replace(/^\uFEFF/, ''), { type: 'string', raw: true });
+  }
   const firstSheetName = workbook.SheetNames[0];
   const worksheet = workbook.Sheets[firstSheetName];
   const rows: any[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
@@ -134,11 +44,10 @@ export function parseBankStatement(fileData: ArrayBuffer | Uint8Array): {
     const row = Array.from(rows[i] || []).map((c) => (c != null ? String(c) : ''));
     const rowStr = row.join(' ');
 
-    if (/(?:M\.|Mme\.|Mlle)\s+([A-Z\s]+)/i.test(rowStr) && !accountInfo.holderName) {
-      const m = rowStr.match(/(?:M\.|Mme\.|Mlle)\s+([A-Z\s]+)/i);
-      if (m) {
-        accountInfo.holderName = m[0].replace(/\s+/g, ' ').trim();
-      }
+    // Crédit Agricole exports name the holder in the header ("M. DUPONT JEAN").
+    const holder = rowStr.match(/(?:M\.|Mme\.?|Mlle)\s+([A-Z][A-Z\s'-]+)/);
+    if (holder && !accountInfo.holderName) {
+      accountInfo.holderName = holder[0].replace(/\s+/g, ' ').trim();
       accountInfo.detectedBank = 'Crédit Agricole';
     }
 
@@ -168,7 +77,9 @@ export function parseBankStatement(fileData: ArrayBuffer | Uint8Array): {
     const row = Array.from(rows[i] || []).map((cell) => (cell != null ? String(cell).toLowerCase().trim() : ''));
 
     const dIdx = row.findIndex((c) => c === 'date' || (c && (c.includes('date op') || c.includes('date de'))));
-    const lIdx = row.findIndex((c) => c === 'libellé' || c === 'libelle' || (c && (c.includes('opération') || c.includes('operation'))));
+    const lIdx = row.findIndex(
+      (c) => c === 'libellé' || c === 'libelle' || (!!c && !c.startsWith('date') && (c.includes('opération') || c.includes('operation'))),
+    );
     const debIdx = row.findIndex((c) => c && (c.includes('débit') || c.includes('debit')));
     const credIdx = row.findIndex((c) => c && (c.includes('crédit') || c.includes('credit')));
     const amtIdx = row.findIndex((c) => c === 'montant' || (c && c.includes('montant')));
@@ -192,6 +103,11 @@ export function parseBankStatement(fileData: ArrayBuffer | Uint8Array): {
     colDebit = 2;
     colCredit = 3;
   }
+
+  // "M. DUPONT JEAN" -> /DUPONT\s+JEAN/i, used to spot transfers to the holder's other accounts.
+  const holderWords = (accountInfo.holderName ?? '').replace(/^(M\.|Mme\.?|Mlle)\s+/i, '').split(/\s+/).filter(Boolean);
+  const escaped = holderWords.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const holderPattern = escaped.length >= 2 ? new RegExp(escaped.join('\\s+'), 'i') : null;
 
   const transactions: Transaction[] = [];
 
@@ -271,21 +187,15 @@ export function parseBankStatement(fileData: ArrayBuffer | Uint8Array): {
     if (amount === 0) continue;
 
     // Merchant and category
-    let cleanMerchant = extractCleanMerchant(rawLabel);
+    const extractedMerchant = extractCleanMerchant(rawLabel);
+    let cleanMerchant = extractedMerchant;
 
-    // Dynamic internal transfer detection based on detected account holder
-    const holderClean = (accountInfo.holderName || '')
-      .replace(/^(M\.|Mme\.|Mlle)\s+/i, '')
-      .trim();
-    const holderParts = holderClean.split(/\s+/).filter(Boolean);
-    const holderRegex =
-      holderParts.length >= 2 ? new RegExp(holderParts.join('\\s+'), 'i') : null;
-
+    // Transfers between the holder's own accounts: the holder's name, or the bank's wording.
     const isInternalTransfer =
-      (holderRegex ? holderRegex.test(rawLabel) : false) ||
-      /intercompte|compte a compte|vers livret|de livret|remise chq/i.test(rawLabel);
+      (holderPattern?.test(rawLabel) ?? false) || /intercompte|compte a compte|vers livret|de livret/i.test(rawLabel);
+    if (isInternalTransfer && /virement/i.test(rawLabel)) cleanMerchant = 'Virement interne';
 
-    const catResult = categorizeTransaction(rawLabel, type, cleanMerchant);
+    const catResult = categorizeTransaction(rawLabel, type, cleanMerchant, rules);
     let finalCategory = catResult.category;
 
     if (isInternalTransfer) {
@@ -305,6 +215,7 @@ export function parseBankStatement(fileData: ArrayBuffer | Uint8Array): {
       monthKey,
       monthLabel,
       rawLabel,
+      extractedMerchant,
       cleanMerchant,
       amount,
       absAmount: Math.abs(amount),

@@ -1,0 +1,226 @@
+/* ==========================================================================
+   App shell
+   ========================================================================== */
+
+.app {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main,
+.footer,
+.topbar__inner {
+  width: 100%;
+  max-width: calc(var(--content) + var(--gutter) * 2);
+  margin: 0 auto;
+  padding-inline: var(--gutter);
+}
+
+.main {
+  flex: 1;
+  padding-bottom: var(--s-8);
+}
+
+/* ---------- Top bar ---------- */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  transition: background-color var(--t) var(--ease);
+}
+
+.topbar__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--s-6);
+  height: var(--header-h);
+}
+
+.topbar__brand {
+  text-decoration: none;
+  border-radius: var(--r-sm);
+}
+
+.topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.topbar__rules .tag {
+  margin-left: 2px;
+}
+
+/* Text tabs; the active one gets a pixel square, Spore-style. */
+.tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.tabs__item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 12px 0 22px;
+  border-radius: var(--r-sm);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--ink-2);
+  white-space: nowrap;
+  transition:
+    color var(--t-fast) var(--ease),
+    background-color var(--t-fast) var(--ease);
+}
+
+.tabs__item::before {
+  content: '';
+  position: absolute;
+  left: 9px;
+  top: calc(50% - 3px);
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  transform: scale(0);
+  transition: transform var(--t) var(--ease);
+}
+
+.tabs__item:hover {
+  color: var(--ink);
+}
+
+.tabs__item[aria-current='page'] {
+  color: var(--ink);
+}
+
+.tabs__item[aria-current='page']::before {
+  transform: scale(1);
+}
+
+/* ---------- Bottom tab bar (mobile) ---------- */
+
+.tabbar {
+  display: none;
+}
+
+/* ---------- Footer ---------- */
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2) var(--s-5);
+  padding-top: var(--s-5);
+  padding-bottom: var(--s-6);
+  border-top: 1px solid var(--line);
+  font-size: var(--fs-xs);
+  color: var(--ink-2);
+}
+
+.footer p {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer p.footer__meta {
+  gap: var(--s-4);
+}
+
+.footer .link-btn {
+  font-size: inherit;
+  font-weight: 400;
+  color: var(--ink-2);
+}
+
+.main:focus {
+  outline: none;
+}
+
+/* ---------- Responsive shell ---------- */
+
+/* The header sheds words before it would ever overflow: label first, then the tag's suffix. */
+@media (max-width: 1280px) {
+  .topbar__rules-label {
+    display: none;
+  }
+}
+
+@media (max-width: 1080px) {
+  .topbar__rules-suffix {
+    display: none;
+  }
+}
+
+@media (max-width: 1000px) {
+  .topbar .tabs {
+    display: none;
+  }
+
+  .tabbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+    background: var(--bg);
+    border-top: 1px solid var(--line);
+  }
+
+  .tabbar__item {
+    display: grid;
+    justify-items: center;
+    gap: 3px;
+    padding: 6px 0 4px;
+    border-radius: var(--r-sm);
+    font-size: var(--fs-2xs);
+    font-weight: 500;
+    color: var(--ink-3);
+    transition: color var(--t-fast) var(--ease);
+  }
+
+  .tabbar__item[aria-current='page'] {
+    color: var(--ink);
+  }
+
+  .tabbar__item[aria-current='page'] svg {
+    color: var(--accent);
+  }
+
+  .app {
+    padding-bottom: calc(68px + env(safe-area-inset-bottom));
+  }
+
+  .toast-region {
+    bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+
+  html {
+    scroll-padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 560px) {
+  :root {
+    --header-h: 56px;
+  }
+
+  .hide-sm {
+    display: none;
+  }
+
+  .topbar__actions .btn--primary {
+    width: 40px;
+    padding: 0;
+  }
+}

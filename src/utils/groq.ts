@@ -1,5 +1,10 @@
 import type { Rule } from '../types';
 import { DEFAULT_CATEGORIES } from './categories';
+import { normalize } from './rules';
+
+const VALID_CATEGORIES = new Set(
+  DEFAULT_CATEGORIES.map((c) => c.id).filter((id) => !['autre', 'revenus', 'virement_interne'].includes(id)),
+);
 
 export interface GroqClassificationResult {
   rawLabel: string;
@@ -66,8 +71,12 @@ ${JSON.stringify(uniqueLabels, null, 2)}
   });
 
   if (!response.ok) {
-    const err = await response.text();
-    throw new Error(`Erreur API Groq (${response.status}): ${err}`);
+    console.error('Groq error', response.status, await response.text());
+    if (response.status === 401 || response.status === 403) {
+      throw new Error('Clé refusée par Groq. Vérifiez-la ou créez-en une nouvelle.');
+    }
+    if (response.status === 429) throw new Error('Limite Groq atteinte. Réessayez dans une minute.');
+    throw new Error('Groq n’a pas pu classer les libellés. Réessayez plus tard.');
   }
 
   const data = await response.json();
@@ -90,8 +99,8 @@ ${JSON.stringify(uniqueLabels, null, 2)}
         }
       }
     }
-  } catch (e) {
-    throw new Error('Impossible de décoder la réponse JSON de Groq.');
+  } catch {
+    throw new Error('Groq n’a pas pu classer les libellés. Réessayez plus tard.');
   }
 
   if (!Array.isArray(parsed)) {
@@ -102,24 +111,22 @@ ${JSON.stringify(uniqueLabels, null, 2)}
   const generatedRules: Rule[] = [];
 
   for (const item of parsed) {
-    if (item.rawLabel && item.category) {
-      results.push({
-        rawLabel: item.rawLabel,
-        cleanMerchant: item.cleanMerchant || item.rawLabel,
-        category: item.category,
-        suggestedKeyword: item.suggestedKeyword || item.cleanMerchant,
-      });
+    // Only accept real spending categories: income or transfer would silently move money out of the totals.
+    if (typeof item?.rawLabel !== 'string' || !VALID_CATEGORIES.has(item.category)) continue;
+    const cleanMerchant = typeof item.cleanMerchant === 'string' && item.cleanMerchant.trim() ? item.cleanMerchant.trim() : item.rawLabel;
+    const keyword = String(item.suggestedKeyword ?? '').toLowerCase().trim();
+    results.push({ rawLabel: item.rawLabel, cleanMerchant, category: item.category, suggestedKeyword: keyword });
 
-      if (item.suggestedKeyword) {
-        generatedRules.push({
-          id: `rule_groq_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-          pattern: item.suggestedKeyword.toLowerCase().trim(),
-          categoryId: item.category,
-          targetMerchantName: item.cleanMerchant,
-          priority: 60,
-          createdAt: new Date().toISOString(),
-        });
-      }
+    // Keep a rule only if the keyword is specific and actually occurs in the label it came from.
+    if (keyword.length >= 4 && normalize(item.rawLabel).includes(normalize(keyword))) {
+      generatedRules.push({
+        id: `rule_groq_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        pattern: keyword,
+        categoryId: item.category,
+        targetMerchantName: cleanMerchant,
+        priority: 60,
+        createdAt: new Date().toISOString(),
+      });
     }
   }
 
