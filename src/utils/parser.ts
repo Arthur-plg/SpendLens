@@ -134,11 +134,12 @@ export function parseBankStatement(fileData: ArrayBuffer | Uint8Array): {
     const row = Array.from(rows[i] || []).map((c) => (c != null ? String(c) : ''));
     const rowStr = row.join(' ');
 
-    if (/M\.\s+PELONG ARTHUR|PELONG/i.test(rowStr)) {
-      accountInfo.holderName = 'M. PELONG ARTHUR';
+    if (/(?:M\.|Mme\.|Mlle)\s+([A-Z\s]+)/i.test(rowStr) && !accountInfo.holderName) {
+      const m = rowStr.match(/(?:M\.|Mme\.|Mlle)\s+([A-Z\s]+)/i);
+      if (m) {
+        accountInfo.holderName = m[0].replace(/\s+/g, ' ').trim();
+      }
       accountInfo.detectedBank = 'Crédit Agricole';
-    } else if (/M\.|Mme\./i.test(rowStr) && !accountInfo.holderName) {
-      accountInfo.holderName = rowStr.trim();
     }
 
     if (/Compte.*n°\s*(\d+)/i.test(rowStr)) {
@@ -272,9 +273,16 @@ export function parseBankStatement(fileData: ArrayBuffer | Uint8Array): {
     // Merchant and category
     let cleanMerchant = extractCleanMerchant(rawLabel);
 
-    // Internal transfer detection (Arthur Pelong intercompte or standard internal patterns)
+    // Dynamic internal transfer detection based on detected account holder
+    const holderClean = (accountInfo.holderName || '')
+      .replace(/^(M\.|Mme\.|Mlle)\s+/i, '')
+      .trim();
+    const holderParts = holderClean.split(/\s+/).filter(Boolean);
+    const holderRegex =
+      holderParts.length >= 2 ? new RegExp(holderParts.join('\\s+'), 'i') : null;
+
     const isInternalTransfer =
-      /pelong\s+arthur/i.test(rawLabel) ||
+      (holderRegex ? holderRegex.test(rawLabel) : false) ||
       /intercompte|compte a compte|vers livret|de livret|remise chq/i.test(rawLabel);
 
     const catResult = categorizeTransaction(rawLabel, type, cleanMerchant);

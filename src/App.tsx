@@ -86,19 +86,35 @@ export function App() {
   }, []);
 
   const loadMockDemoData = () => {
-    const mockTxs: Transaction[] = [
-      { id: '1', date: '2026-10-23', rawDate: '23/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Paiement par carte - CARREFOUR CITY PARIS', cleanMerchant: 'Carrefour City', amount: -24.50, absAmount: 24.50, type: 'debit', isInternalTransfer: false, category: 'alimentation', categorizationMethod: 'rule' },
-      { id: '2', date: '2026-10-22', rawDate: '22/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Paiement par carte - BISTROT MADAME PARIS', cleanMerchant: 'Bistrot Madame', amount: -42.00, absAmount: 42.00, type: 'debit', isInternalTransfer: false, category: 'restaurants', categorizationMethod: 'rule' },
-      { id: '3', date: '2026-10-20', rawDate: '20/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Prélèvement - ARGAUX IMMO GESTION LOYER', cleanMerchant: 'Argaux Immo', amount: -420.00, absAmount: 420.00, type: 'debit', isInternalTransfer: false, category: 'logement', categorizationMethod: 'rule' },
-      { id: '4', date: '2026-10-18', rawDate: '18/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Paiement par carte - SNCF CONNECT VOYAGEURS', cleanMerchant: 'SNCF', amount: -56.00, absAmount: 56.00, type: 'debit', isInternalTransfer: false, category: 'transports', categorizationMethod: 'rule' },
-      { id: '5', date: '2026-10-15', rawDate: '15/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Paiement par carte - SPOTIFY PREMIUM', cleanMerchant: 'Spotify', amount: -10.99, absAmount: 10.99, type: 'debit', isInternalTransfer: false, category: 'abonnements', categorizationMethod: 'rule' },
-      { id: '6', date: '2026-10-14', rawDate: '14/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Paiement par carte - ORANGE SA FIBRE', cleanMerchant: 'Orange', amount: -29.99, absAmount: 29.99, type: 'debit', isInternalTransfer: false, category: 'abonnements', categorizationMethod: 'rule' },
-      { id: '7', date: '2026-10-10', rawDate: '10/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Paiement par carte - BASIC FIT PARIS', cleanMerchant: 'Basic Fit', amount: -29.99, absAmount: 29.99, type: 'debit', isInternalTransfer: false, category: 'loisirs', categorizationMethod: 'rule' },
-      { id: '8', date: '2026-10-05', rawDate: '05/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Paiement par carte - BITSTACK BITCOIN DCA', cleanMerchant: 'Bitstack', amount: -50.00, absAmount: 50.00, type: 'debit', isInternalTransfer: false, category: 'epargne', categorizationMethod: 'rule' },
-      { id: '9', date: '2026-10-01', rawDate: '01/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Virement en votre faveur - VIREMENT SALAIRE', cleanMerchant: 'Salaire Entreprise', amount: 2150.00, absAmount: 2150.00, type: 'credit', isInternalTransfer: false, category: 'revenus', categorizationMethod: 'rule' },
+    const demoItems = [
+      // Octobre 2026
+      { id: 'd1', date: '2026-10-24', rawDate: '24/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Paiement par carte - MONOPRIX BASTILLE PARIS', cleanMerchant: 'Monoprix', amount: -38.40, absAmount: 38.40, type: 'debit' as const, isInternalTransfer: false, category: 'alimentation', categorizationMethod: 'rule' as const },
+      { id: 'd2', date: '2026-10-23', rawDate: '23/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Paiement par carte - UBER * EATS PENDING 22/10 - Uber Eats', cleanMerchant: 'Uber Eats', amount: -21.50, absAmount: 21.50, type: 'debit' as const, isInternalTransfer: false, category: 'restaurants', categorizationMethod: 'rule' as const },
+      { id: 'd3', date: '2026-10-21', rawDate: '21/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Paiement par carte - BOULANGERIE DU MARCHE PARIS', cleanMerchant: 'Boulangerie Artisanale', amount: -5.60, absAmount: 5.60, type: 'debit' as const, isInternalTransfer: false, category: 'alimentation', categorizationMethod: 'rule' as const },
+      { id: 'd4', date: '2026-10-18', rawDate: '18/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Paiement par carte - SNCF CONNECT VOYAGEURS', cleanMerchant: 'SNCF Voyageurs', amount: -65.00, absAmount: 65.00, type: 'debit' as const, isInternalTransfer: false, category: 'transports', categorizationMethod: 'rule' as const },
+      { id: 'd5', date: '2026-10-15', rawDate: '15/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Prélèvement - FORFAIT NAVIGO ILE DE FRANCE MOBILITES', cleanMerchant: 'Navigo Transports', amount: -86.40, absAmount: 86.40, type: 'debit' as const, isInternalTransfer: false, category: 'transports', categorizationMethod: 'rule' as const },
+      { id: 'd6', date: '2026-10-14', rawDate: '14/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Paiement par carte - SPOTIFY PREMIUM', cleanMerchant: 'Spotify', amount: -10.99, absAmount: 10.99, type: 'debit' as const, isInternalTransfer: false, category: 'abonnements', categorizationMethod: 'rule' as const },
+      { id: 'd7', date: '2026-10-12', rawDate: '12/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Paiement par carte - BISTROT DE LA PLACE', cleanMerchant: 'Le Petit Bistrot', amount: -48.00, absAmount: 48.00, type: 'debit' as const, isInternalTransfer: false, category: 'restaurants', categorizationMethod: 'rule' as const },
+      { id: 'd8', date: '2026-10-10', rawDate: '10/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Paiement par carte - DECATHLON REPUBLIQUE', cleanMerchant: 'Decathlon Sport', amount: -54.90, absAmount: 54.90, type: 'debit' as const, isInternalTransfer: false, category: 'loisirs', categorizationMethod: 'rule' as const },
+      { id: 'd9', date: '2026-10-08', rawDate: '08/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Prélèvement - BASIC FIT FITNESS CLUB', cleanMerchant: 'Basic Fit Club', amount: -29.99, absAmount: 29.99, type: 'debit' as const, isInternalTransfer: false, category: 'loisirs', categorizationMethod: 'rule' as const },
+      { id: 'd10', date: '2026-10-06', rawDate: '06/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Prélèvement - AGENCE IMMOBILIERE NATION - LOYER', cleanMerchant: 'Agence Immobilière Loyer', amount: -650.00, absAmount: 650.00, type: 'debit' as const, isInternalTransfer: false, category: 'logement', categorizationMethod: 'rule' as const },
+      { id: 'd11', date: '2026-10-05', rawDate: '05/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Paiement par carte - PHARMACIE DE LA MAIRIE', cleanMerchant: 'Pharmacie de la Mairie', amount: -18.70, absAmount: 18.70, type: 'debit' as const, isInternalTransfer: false, category: 'sante', categorizationMethod: 'rule' as const },
+      { id: 'd12', date: '2026-10-04', rawDate: '04/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Virement émis - WERO REMBOURSEMENT CADEAU JULIEN', cleanMerchant: 'Virement proche (Julien)', amount: -35.00, absAmount: 35.00, type: 'debit' as const, isInternalTransfer: false, category: 'proches_amis', categorizationMethod: 'rule' as const },
+      { id: 'd13', date: '2026-10-03', rawDate: '03/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Paiement par carte - TRADE REPUBLIC INVEST', cleanMerchant: 'Trade Republic (Épargne)', amount: -150.00, absAmount: 150.00, type: 'debit' as const, isInternalTransfer: false, category: 'epargne', categorizationMethod: 'rule' as const },
+      { id: 'd14', date: '2026-10-02', rawDate: '02/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Cotisation - COTISATION OFFRE BANCAIRE', cleanMerchant: 'Frais Bancaires', amount: -4.50, absAmount: 4.50, type: 'debit' as const, isInternalTransfer: false, category: 'frais_bancaires', categorizationMethod: 'rule' as const },
+      { id: 'd15', date: '2026-10-01', rawDate: '01/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Virement en votre faveur - VIREMENT SALAIRE SAS TECHLAB', cleanMerchant: 'Virement Salaire (TechLab)', amount: 2850.00, absAmount: 2850.00, type: 'credit' as const, isInternalTransfer: false, category: 'revenus', categorizationMethod: 'rule' as const },
+
+      // Septembre 2026
+      { id: 'd16', date: '2026-09-28', rawDate: '28/09/2026', monthKey: '2026-09', monthLabel: 'Septembre 2026', rawLabel: 'Paiement par carte - CARREFOUR MARKET PARIS', cleanMerchant: 'Carrefour Market', amount: -72.30, absAmount: 72.30, type: 'debit' as const, isInternalTransfer: false, category: 'alimentation', categorizationMethod: 'rule' as const },
+      { id: 'd17', date: '2026-09-20', rawDate: '20/09/2026', monthKey: '2026-09', monthLabel: 'Septembre 2026', rawLabel: 'Paiement par carte - PIZZERIA NAPOLI', cleanMerchant: 'Pizzeria Napoli', amount: -32.50, absAmount: 32.50, type: 'debit' as const, isInternalTransfer: false, category: 'restaurants', categorizationMethod: 'rule' as const },
+      { id: 'd18', date: '2026-09-15', rawDate: '15/09/2026', monthKey: '2026-09', monthLabel: 'Septembre 2026', rawLabel: 'Prélèvement - FORFAIT NAVIGO ILE DE FRANCE MOBILITES', cleanMerchant: 'Navigo Transports', amount: -86.40, absAmount: 86.40, type: 'debit' as const, isInternalTransfer: false, category: 'transports', categorizationMethod: 'rule' as const },
+      { id: 'd19', date: '2026-09-14', rawDate: '14/09/2026', monthKey: '2026-09', monthLabel: 'Septembre 2026', rawLabel: 'Paiement par carte - SPOTIFY PREMIUM', cleanMerchant: 'Spotify', amount: -10.99, absAmount: 10.99, type: 'debit' as const, isInternalTransfer: false, category: 'abonnements', categorizationMethod: 'rule' as const },
+      { id: 'd20', date: '2026-09-06', rawDate: '06/09/2026', monthKey: '2026-09', monthLabel: 'Septembre 2026', rawLabel: 'Prélèvement - AGENCE IMMOBILIERE NATION - LOYER', cleanMerchant: 'Agence Immobilière Loyer', amount: -650.00, absAmount: 650.00, type: 'debit' as const, isInternalTransfer: false, category: 'logement', categorizationMethod: 'rule' as const },
+      { id: 'd21', date: '2026-09-01', rawDate: '01/09/2026', monthKey: '2026-09', monthLabel: 'Septembre 2026', rawLabel: 'Virement en votre faveur - VIREMENT SALAIRE SAS TECHLAB', cleanMerchant: 'Virement Salaire (TechLab)', amount: 2850.00, absAmount: 2850.00, type: 'credit' as const, isInternalTransfer: false, category: 'revenus', categorizationMethod: 'rule' as const },
     ];
-    setTransactions(mockTxs);
-    setAccountInfo({ holderName: 'Compte Démo', detectedBank: 'Banque Démo' });
+
+    setTransactions(demoItems);
+    setAccountInfo({ holderName: 'Alexandre Martin (Démo)', detectedBank: 'Banque Populaire' });
     setSelectedMonthKey('2026-10');
   };
 
@@ -285,22 +301,27 @@ export function App() {
   // Recurring subscriptions detected
   const recurringSubscriptions = useMemo(() => {
     const candidates = [
-      { name: 'Argaux Immo (Loyer)', cat: 'logement', pattern: /argaux/i, amount: 420.0, cadence: 'Mensuel' },
-      { name: 'Orange SA (Télécom)', cat: 'abonnements', pattern: /orange/i, amount: 20.99, cadence: 'Mensuel' },
-      { name: 'Canal+ (Streaming)', cat: 'abonnements', pattern: /canal\+/i, amount: 19.99, cadence: 'Mensuel' },
-      { name: 'TCL Relation Usagers (Transports Lyon)', cat: 'transports', pattern: /tcl|spl relation/i, amount: 25.0, cadence: 'Mensuel' },
-      { name: 'Spotify / Apple / Tech', cat: 'abonnements', pattern: /spotify|apple|google/i, amount: 10.99, cadence: 'Mensuel' },
-      { name: 'MAIF (Assurance)', cat: 'logement', pattern: /maif/i, amount: 137.27, cadence: 'Annuel / Mensualisé' },
-      { name: 'Basic-Fit / Neoness (Sport)', cat: 'loisirs', pattern: /basic fit|neoness|wellpass/i, amount: 39.99, cadence: 'Mensuel' },
-      { name: 'Offre Globe Trotter (Frais CA)', cat: 'frais_bancaires', pattern: /globe trotter/i, amount: 2.0, cadence: 'Mensuel' },
+      { name: 'Loyer & Logement', cat: 'logement', pattern: /loyer|bail|argaux|foncia/i, amount: 650.0, cadence: 'Mensuel' },
+      { name: 'Forfait Mobile & Internet', cat: 'abonnements', pattern: /orange|free mobile|sfr|bouygues/i, amount: 29.99, cadence: 'Mensuel' },
+      { name: 'Streaming Vidéo', cat: 'abonnements', pattern: /canal\+|netflix|disney|prime video/i, amount: 15.99, cadence: 'Mensuel' },
+      { name: 'Transports en Commun', cat: 'transports', pattern: /navigo|tcl|ratp|spl relation/i, amount: 86.40, cadence: 'Mensuel' },
+      { name: 'Streaming Musical & Cloud', cat: 'abonnements', pattern: /spotify|apple|google|deezer/i, amount: 10.99, cadence: 'Mensuel' },
+      { name: 'Assurance Habitation / Auto', cat: 'logement', pattern: /maif|macif|allianz|axa/i, amount: 25.00, cadence: 'Mensuel' },
+      { name: 'Abonnement Sport & Fitness', cat: 'loisirs', pattern: /basic fit|fitness park|neoness|wellpass/i, amount: 29.99, cadence: 'Mensuel' },
+      { name: 'Frais & Services Bancaires', cat: 'frais_bancaires', pattern: /cotisation|frais bancaire|globe trotter/i, amount: 4.50, cadence: 'Mensuel' },
     ];
 
     return candidates.map(c => {
-      const matchCount = transactions.filter(t => c.pattern.test(t.rawLabel)).length;
+      const matches = transactions.filter(t => c.pattern.test(t.rawLabel) && t.type === 'debit');
+      const avgAmount = matches.length > 0
+        ? matches.reduce((acc, curr) => acc + curr.absAmount, 0) / matches.length
+        : c.amount;
+
       return {
         ...c,
-        detectedOccurrences: matchCount,
-        isActive: matchCount >= 2,
+        amount: avgAmount,
+        detectedOccurrences: matches.length,
+        isActive: matches.length >= 2,
       };
     }).filter(c => c.isActive);
   }, [transactions]);

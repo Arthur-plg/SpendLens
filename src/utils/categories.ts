@@ -97,22 +97,14 @@ export const DEFAULT_CATEGORIES: CategoryDefinition[] = [
 ];
 
 export const DEFAULT_RULES: Rule[] = [
-  // 1. Virements internes (Arthur Pelong)
+  // 1. Virements internes
   {
     id: 'rule_interne_1',
-    pattern: 'PELONG ARTHUR',
-    categoryId: 'virement_interne',
-    targetMerchantName: 'Virement interne (Pelong Arthur)',
-    priority: 100,
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 'rule_interne_2',
-    pattern: 'intercompte|compte a compte|vers livret|de livret',
+    pattern: 'virement interne|intercompte|compte a compte|vers livret|de livret',
     isRegex: true,
     categoryId: 'virement_interne',
     targetMerchantName: 'Virement interne',
-    priority: 95,
+    priority: 100,
     createdAt: new Date().toISOString(),
   },
 
@@ -122,7 +114,7 @@ export const DEFAULT_RULES: Rule[] = [
     pattern: "globe trotter|frais irreg|cotisation|frais bancaire|incident|commission d'inter|rejet",
     isRegex: true,
     categoryId: 'frais_bancaires',
-    targetMerchantName: 'Frais bancaires (CA)',
+    targetMerchantName: 'Frais bancaires',
     priority: 95,
     createdAt: new Date().toISOString(),
   },
@@ -139,7 +131,7 @@ export const DEFAULT_RULES: Rule[] = [
   // 3. Virements proches et amis / famille
   {
     id: 'rule_proches_amis',
-    pattern: 'wero|vir inst|rembourser|remboursement|cadeau|maman|charles pelong|paquier|salome pierre|lydia|leetchi|helloasso|ouanes|dieme|lionel quach',
+    pattern: 'wero|vir inst|rembourser|remboursement|cadeau|maman|papa|amis|partage|lydia|leetchi|helloasso',
     isRegex: true,
     categoryId: 'proches_amis',
     targetMerchantName: 'Virement proche / ami',
@@ -150,10 +142,10 @@ export const DEFAULT_RULES: Rule[] = [
   // 4. Logement, Loyers, Charges & Assurances
   {
     id: 'rule_logement_loyer',
-    pattern: 'argaux immo|loyer|charges copro|maif|edf|engie|totalenergies|veolia|assurance habitation',
+    pattern: 'loyer|bail|charges copro|maif|edf|engie|totalenergies|veolia|assurance habitation',
     isRegex: true,
     categoryId: 'logement',
-    targetMerchantName: 'Loyer & Charges (Argaux Immo)',
+    targetMerchantName: 'Loyer & Charges',
     priority: 90,
     createdAt: new Date().toISOString(),
   },
@@ -200,7 +192,7 @@ export const DEFAULT_RULES: Rule[] = [
   // 7. Santé, Médecins, Pharmacies
   {
     id: 'rule_sante_doctors',
-    pattern: 'pharmacie|doctolib|laboratoire|biolab|eurofins|dentiste|dent|opticien|ophtalmo|kine|medecin|derma|soins devis|aude thibous|dr matard|dr remy|dr dov gozlan|docteur',
+    pattern: 'pharmacie|doctolib|laboratoire|biolab|eurofins|dentiste|dent|opticien|ophtalmo|kine|medecin|derma|soins devis|docteur',
     isRegex: true,
     categoryId: 'sante',
     priority: 85,
