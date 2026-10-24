@@ -1,0 +1,169 @@
+/*
+ * SpendLens design tokens
+ * Language borrowed from Spore.bio: pure white / pure black planes, one royal
+ * blue that becomes mint on dark, pixel display type over a plain grotesk,
+ * 10px controls and stepped "pixel" corners used sparingly.
+ */
+
+@font-face {
+  font-family: 'Geist Pixel';
+  src: url('../assets/fonts/GeistPixel-Square.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Type */
+  --font-sans: 'Archivo Variable', 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  --font-pixel: 'Geist Pixel', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* Pixel: display (the one key figure), h1 (view titles), h2 (secondary pixel headings).
+     Archivo: body 15, sm 13 (secondary text), xs 12 (uppercase eyebrows), 2xs 11 (tags, table heads, axes). */
+  --fs-display: clamp(3rem, 1.6rem + 4.6vw, 5.25rem);
+  --fs-h1: clamp(1.75rem, 1.35rem + 1.3vw, 2.5rem);
+  --fs-h2: 1.5rem;
+  --fs-figure: 1.75rem;
+  --fs-body: 0.9375rem;
+  --fs-sm: 0.8125rem;
+  --fs-xs: 0.75rem;
+  --fs-2xs: 0.6875rem;
+
+  --lh-tight: 1.05;
+  --lh-snug: 1.3;
+  --lh-body: 1.55;
+
+  /* Space (4px base) */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+  --s-9: 96px;
+
+  --gutter: clamp(16px, 4vw, 40px);
+  --content: 1240px;
+  --header-h: 64px;
+
+  /* Shape */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r: 10px;
+  --r-lg: 16px;
+  --drop: 24px; /* height of the stepped tab on signal panels, after Spore's footer card */
+
+  /* Motion */
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --t-fast: 150ms;
+  --t: 200ms;
+  --t-slow: 250ms;
+
+  /* Brand constants (theme independent) */
+  --spore-blue: #183ad3;
+  --spore-navy: #051042;
+  --spore-periwinkle: #c2d2ff;
+  --spore-mint: #00ffc2;
+
+  color-scheme: light;
+
+  /* Light theme */
+  --bg: #ffffff;
+  --bg-raised: #ffffff;
+  --well: #f2f4f9;
+  --well-hover: #e9edf7;
+  --ink: #08090c;
+  --ink-2: #4f525c;
+  --ink-3: #62656f;
+  --line: rgba(8, 9, 12, 0.1);
+  --line-strong: #08090c;
+
+  --accent: var(--spore-blue);
+  --on-accent: #ffffff;
+  --accent-soft: #e8edff;
+  --accent-tint: var(--spore-periwinkle);
+
+  --negative: #c4321f;
+  --negative-soft: #fcebe8;
+
+  --panel: var(--spore-navy);
+  --panel-ink: #ffffff;
+  --panel-ink-2: #a9b9f0;
+  --panel-line: rgba(194, 210, 255, 0.16);
+  --panel-signal: var(--spore-mint);
+  --panel-muted: rgba(194, 210, 255, 0.28);
+
+  --overlay: rgba(5, 16, 66, 0.32);
+  --shadow-pop: 0 1px 2px rgba(5, 16, 66, 0.06), 0 12px 32px -8px rgba(5, 16, 66, 0.18);
+  --focus: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+
+  /* Category data colours (fills only, never text) */
+  --cat-logement: #051042;
+  --cat-alimentation: #183ad3;
+  --cat-restaurants: #6f8cff;
+  --cat-transports: #00a383;
+  --cat-loisirs: #b3c4ff;
+  --cat-abonnements: #3e4766;
+  --cat-epargne: #00dfa8;
+  --cat-proches_amis: #8a91a6;
+  --cat-sante: #86e3cf;
+  --cat-frais_bancaires: #c4c8d3;
+  --cat-autre: #dfe2ea;
+  --cat-revenus: #183ad3;
+  --cat-virement_interne: #a3a8b6;
+
+  --chart-expense: var(--spore-blue);
+  --chart-expense-dim: #7089ee;
+  --chart-income: var(--ink);
+  --chart-grid: rgba(8, 9, 12, 0.07);
+}
+
+/* Dark theme: Spore's black planes, mint replaces blue as the signal colour. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #000000;
+  --bg-raised: #0b0b0d;
+  --well: rgba(255, 255, 255, 0.08);
+  --well-hover: rgba(255, 255, 255, 0.12);
+  --ink: #ffffff;
+  --ink-2: rgba(255, 255, 255, 0.7);
+  --ink-3: rgba(255, 255, 255, 0.52);
+  --line: rgba(255, 255, 255, 0.12);
+  --line-strong: #ffffff;
+
+  --accent: var(--spore-mint);
+  --on-accent: #000000;
+  --accent-soft: rgba(0, 255, 194, 0.12);
+  --accent-tint: rgba(0, 255, 194, 0.3);
+
+  --negative: #ff7a66;
+  --negative-soft: rgba(255, 122, 102, 0.12);
+
+  --panel: #07114a;
+  --panel-line: rgba(194, 210, 255, 0.18);
+
+  --overlay: rgba(0, 0, 0, 0.6);
+  --shadow-pop: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 16px 40px -8px rgba(0, 0, 0, 0.7);
+
+  --cat-logement: #c2d2ff;
+  --cat-alimentation: #5d7cff;
+  --cat-restaurants: #2a46e0;
+  --cat-transports: #00c99a;
+  --cat-loisirs: #8ea4ff;
+  --cat-abonnements: #f2f3f7;
+  --cat-epargne: #00735c;
+  --cat-proches_amis: #7c8296;
+  --cat-sante: #5fd6bb;
+  --cat-frais_bancaires: #4a4f5e;
+  --cat-autre: #2c2f38;
+  --cat-revenus: #8ea4ff;
+  --cat-virement_interne: #5b6070;
+
+  --chart-expense: #c2d2ff;
+  --chart-expense-dim: #3d55c0;
+  --chart-income: var(--spore-mint);
+  --chart-grid: rgba(255, 255, 255, 0.08);
+}

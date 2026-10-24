@@ -1,0 +1,1034 @@
+/* ==========================================================================
+   Views
+   ========================================================================== */
+
+/* View-level grids get an explicit shrinkable track so wide children (tables, charts) never widen the page. */
+.overview,
+.trends,
+.recurring,
+.ledger {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* ---------- Overview ---------- */
+
+.overview {
+  gap: var(--s-8);
+}
+
+/* Asymmetric top: one dominant figure, a quiet ledger beside it, both ending on one line. */
+.overview__top {
+  display: grid;
+  gap: var(--s-5) var(--s-7);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 960px) {
+  .overview__top {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+    align-items: stretch;
+  }
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  min-height: 360px;
+}
+
+.hero__figure {
+  margin-top: var(--s-2);
+}
+
+.hero__lede {
+  max-width: 46ch;
+  font-size: 1.0625rem;
+  line-height: 1.45;
+  color: var(--panel-ink-2);
+}
+
+.hero__foot {
+  margin-top: auto;
+  padding-top: var(--s-5);
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+
+.hero__scale {
+  display: flex;
+  justify-content: space-between;
+  max-width: 100%;
+  font-size: var(--fs-2xs);
+  color: var(--panel-ink-2);
+}
+
+/* KPI ledger: ruled rows, not cards. */
+.kpis {
+  display: grid;
+  align-content: start;
+  border-top: 1px solid var(--line-strong);
+}
+
+@media (min-width: 960px) {
+  .kpis {
+    grid-auto-rows: 1fr;
+    align-content: stretch;
+    margin-top: var(--drop);
+  }
+
+  .kpi {
+    align-content: center;
+  }
+}
+
+.kpi {
+  display: grid;
+  gap: 6px;
+  padding: var(--s-4) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.kpi dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px var(--s-3);
+}
+
+.kpi__figure {
+  font-size: var(--fs-figure);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.kpi__note {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
+
+.kpi__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: var(--r-xs);
+  transition: color var(--t-fast) var(--ease);
+}
+
+.kpi__link svg {
+  color: var(--ink-3);
+  transition:
+    transform var(--t) var(--ease),
+    color var(--t-fast) var(--ease);
+}
+
+.kpi__link:hover svg {
+  color: var(--accent);
+  transform: translateX(3px);
+}
+
+.overview__split {
+  display: grid;
+  gap: var(--s-7);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 960px) {
+  .overview__split {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+  }
+}
+
+.cat-table {
+  list-style: none;
+}
+
+.cat-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'name amount'
+    'share share';
+  align-items: start;
+  gap: 8px var(--s-4);
+  width: 100%;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+
+@media (min-width: 640px) {
+  .cat-row {
+    grid-template-columns: minmax(0, 1fr) 168px 104px;
+    grid-template-areas: 'name share amount';
+    align-items: center;
+  }
+}
+
+.cat-row:focus-visible {
+  outline-offset: -2px;
+}
+
+.cat-row__name {
+  grid-area: name;
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.cat-row__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 500;
+  transition: color var(--t-fast) var(--ease);
+}
+
+.cat-row:hover .cat-row__title {
+  color: var(--accent);
+}
+
+.cat-row__sub {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-left: 19px;
+}
+
+.cat-row__share {
+  grid-area: share;
+  display: grid;
+  grid-template-columns: 1fr 52px;
+  align-items: center;
+  gap: 12px;
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+  text-align: right;
+}
+
+.cat-row__amount {
+  grid-area: amount;
+  font-weight: 500;
+  text-align: right;
+}
+
+.largest__list {
+  list-style: none;
+  margin-bottom: var(--s-4);
+}
+
+.largest__item {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--s-3);
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.largest__date {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
+
+.largest__body {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.largest__merchant {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.largest__amount {
+  font-weight: 500;
+}
+
+/* ---------- Transactions ---------- */
+
+.tx__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2) var(--s-3);
+}
+
+.tx__summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-2);
+  padding: var(--s-5) 0 var(--s-3);
+  border-bottom: 1px solid var(--line-strong);
+  font-size: var(--fs-sm);
+}
+
+.tx__summary strong {
+  font-weight: 500;
+}
+
+.ledger__day > ul {
+  list-style: none;
+}
+
+.ledger__date {
+  position: sticky;
+  top: var(--header-h);
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 18px 0 8px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  font-size: var(--fs-sm);
+}
+
+.row {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'main amount'
+    'cat cat';
+  align-items: start;
+  gap: 4px var(--s-3);
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+@media (min-width: 760px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr) 220px 120px;
+    grid-template-areas: 'main cat amount';
+    align-items: center;
+    padding: 10px 0;
+  }
+
+  /* Hover wash bleeds past the column so hairlines and numbers stay on the grid. */
+  .row::before {
+    content: '';
+    position: absolute;
+    inset: 0 -8px;
+    z-index: -1;
+    border-radius: var(--r-sm);
+    background: var(--well);
+    opacity: 0;
+    transition: opacity var(--t-fast) var(--ease);
+  }
+
+  .row:hover::before {
+    opacity: 1;
+  }
+}
+
+.row__main {
+  grid-area: main;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.row__merchant {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  min-width: 0;
+}
+
+.row__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row__raw {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row__cat {
+  grid-area: cat;
+  min-width: 0;
+  margin-left: -10px;
+}
+
+.row__amount {
+  grid-area: amount;
+  font-weight: 500;
+  text-align: right;
+}
+
+@media (max-width: 759px) {
+  .row__raw {
+    display: none;
+  }
+}
+
+.ledger__more {
+  justify-self: center;
+  margin-top: var(--s-5);
+  gap: 6px;
+}
+
+.ledger__more-count {
+  color: var(--ink-3);
+}
+
+/* ---------- Trends ---------- */
+
+.trends {
+  gap: var(--s-7);
+}
+
+.readout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s-2) var(--s-5);
+  min-height: 40px;
+  margin-bottom: var(--s-5);
+}
+
+.readout__month {
+  font-size: 1.25rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.readout__vals {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2) var(--s-5);
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+
+.readout__vals b {
+  margin-left: 6px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.key {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 8px;
+  border-radius: 2px;
+  vertical-align: -1px;
+}
+
+.key--expense {
+  background: var(--chart-expense);
+}
+
+.key--income {
+  height: 2px;
+  vertical-align: 3px;
+  background: var(--chart-income);
+}
+
+.chart {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: var(--s-2);
+}
+
+.chart__axis {
+  position: relative;
+  height: 280px;
+  font-size: var(--fs-2xs);
+  color: var(--ink-3);
+}
+
+.chart__axis span {
+  position: absolute;
+  right: 0;
+  transform: translateY(50%);
+  white-space: nowrap;
+}
+
+.chart__plot {
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  height: 280px;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.chart__grid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--chart-grid);
+  pointer-events: none;
+}
+
+.chart__col {
+  position: relative;
+  height: 100%;
+  border-radius: var(--r-xs) var(--r-xs) 0 0;
+  transition: background-color var(--t-fast) var(--ease);
+}
+
+.chart__col:hover,
+.chart__col:focus-visible {
+  background: var(--well);
+}
+
+.chart__col:focus-visible {
+  outline-offset: 0;
+}
+
+.chart__bar {
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  bottom: 0;
+  background: var(--chart-expense-dim);
+  border-radius: 2px 2px 0 0;
+  transition:
+    background-color var(--t) var(--ease),
+    height var(--t-slow) var(--ease);
+}
+
+.chart__col:hover .chart__bar,
+.chart__col.is-selected .chart__bar {
+  background: var(--chart-expense);
+}
+
+.chart__col.is-partial .chart__bar {
+  background-image: repeating-linear-gradient(-45deg, transparent 0 3px, color-mix(in srgb, var(--bg) 55%, transparent) 3px 5px);
+}
+
+/* Income drawn as a stepped line: one tread per month, one riser between months. */
+.chart__step {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  margin-bottom: -1px;
+  background: var(--chart-income);
+  pointer-events: none;
+}
+
+.chart__col.is-partial .chart__step {
+  background: repeating-linear-gradient(90deg, var(--chart-income) 0 4px, transparent 4px 7px);
+}
+
+.chart__riser {
+  position: absolute;
+  left: -1px;
+  width: 2px;
+  background: var(--chart-income);
+  pointer-events: none;
+}
+
+.chart__label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -26px;
+  font-size: var(--fs-2xs);
+  color: var(--ink-3);
+  text-align: center;
+}
+
+.chart__col.is-selected .chart__label {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.chart-card__note {
+  margin-top: 40px;
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
+
+@media (max-width: 560px) {
+  .chart__axis,
+  .chart__plot {
+    height: 220px;
+  }
+
+  .chart__col:nth-of-type(even):not(.is-selected) .chart__label {
+    visibility: hidden;
+  }
+}
+
+/* ---------- Charges fixes ---------- */
+
+.recurring {
+  gap: var(--s-7);
+}
+
+.recurring__summary {
+  display: grid;
+  gap: var(--s-3);
+}
+
+@media (min-width: 960px) {
+  .recurring__summary {
+    max-width: calc((100% - var(--s-7)) * 7 / 11);
+  }
+}
+
+.rec-list {
+  list-style: none;
+}
+
+.rec {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'name amount'
+    'presence presence'
+    'last last';
+  align-items: start;
+  gap: 8px var(--s-4);
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+@media (min-width: 860px) {
+  .rec {
+    grid-template-columns: minmax(0, 1fr) auto 128px 200px;
+    grid-template-areas: 'name presence amount last';
+    align-items: center;
+    gap: var(--s-5);
+  }
+}
+
+.rec.is-stopped .rec__merchant,
+.rec.is-stopped .rec__amount {
+  color: var(--ink-3);
+}
+
+.rec__name {
+  grid-area: name;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.rec__merchant {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.rec__amount {
+  grid-area: amount;
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.rec__amount .faint {
+  font-weight: 400;
+  font-size: var(--fs-sm);
+}
+
+.rec__last {
+  grid-area: last;
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
+
+@media (min-width: 860px) {
+  .rec__last {
+    text-align: right;
+  }
+}
+
+/* One square per month, on the same 10px lattice as the hero's pixel bars. */
+.presence {
+  grid-area: presence;
+  display: flex;
+  gap: 3px;
+}
+
+.presence > span {
+  width: 10px;
+  height: 10px;
+  background: var(--well);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.presence > span.is-on {
+  background: var(--accent);
+  box-shadow: none;
+}
+
+.rec.is-stopped .presence > span.is-on {
+  background: var(--ink-3);
+}
+
+.footnote {
+  max-width: 72ch;
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  color: var(--ink-3);
+}
+
+/* ---------- Simulator ---------- */
+
+.sim {
+  display: grid;
+  gap: var(--s-6) var(--s-7);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+
+@media (min-width: 960px) {
+  .sim {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+  }
+
+  .sim__result {
+    position: sticky;
+    top: calc(var(--header-h) + var(--s-5));
+  }
+}
+
+/* On small screens the result rides above the tab bar, so every tap shows its effect. */
+@media (max-width: 959px) {
+  /* Floating over content, the panel drops its tab so nothing shows through the notch. */
+  .sim__result {
+    --drop: 0px;
+    position: sticky;
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    z-index: 3;
+    order: 2;
+    padding-top: 18px;
+    padding-bottom: 18px;
+  }
+
+  .sim__result::after {
+    display: none;
+  }
+
+  .sim__result .sim__facts,
+  .sim__result .sim__hint {
+    display: none;
+  }
+
+  .sim__result .money--display {
+    font-size: 2.25rem;
+  }
+}
+
+.sim__list {
+  list-style: none;
+}
+
+.sim-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'name amount'
+    'ctrl ctrl';
+  align-items: center;
+  gap: 8px var(--s-4);
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+@media (min-width: 640px) {
+  .sim-row {
+    grid-template-columns: minmax(0, 1fr) 132px auto;
+    grid-template-areas: 'name amount ctrl';
+  }
+}
+
+.sim-row__name {
+  grid-area: name;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  min-width: 0;
+}
+
+.sim-row__amount {
+  grid-area: amount;
+  text-align: right;
+  font-weight: 500;
+}
+
+.sim-row__amount s {
+  margin-right: 8px;
+  font-weight: 400;
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
+
+.sim-row .segmented {
+  grid-area: ctrl;
+  justify-self: start;
+  margin-left: -8px;
+}
+
+@media (min-width: 640px) {
+  .sim-row .segmented {
+    justify-self: end;
+    margin-left: 0;
+  }
+}
+
+.sim__result {
+  display: grid;
+  gap: var(--s-4);
+}
+
+.sim__facts {
+  display: grid;
+  margin-top: var(--s-2);
+  border-top: 1px solid var(--panel-line);
+}
+
+.sim__facts div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding: 12px 0;
+  border-bottom: 1px solid var(--panel-line);
+  font-size: var(--fs-sm);
+}
+
+.sim__facts dt {
+  color: var(--panel-ink-2);
+}
+
+.sim__facts b {
+  font-weight: 500;
+}
+
+.sim__hint {
+  font-size: var(--fs-sm);
+  color: var(--panel-ink-2);
+}
+
+/* ---------- Loading ---------- */
+
+.loading__stack {
+  display: grid;
+  gap: var(--s-5);
+  align-content: start;
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--line-strong);
+}
+
+@media (min-width: 960px) {
+  .loading__stack {
+    margin-top: var(--drop);
+  }
+}
+
+/* ---------- Categorization drawer ---------- */
+
+.cz-score {
+  display: grid;
+  gap: var(--s-3);
+}
+
+.cz-score__figure {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--s-4);
+}
+
+.cz-score__figure .pixel {
+  font-size: var(--fs-h1);
+  line-height: 0.9;
+}
+
+.cz-score__figure .muted {
+  font-size: var(--fs-sm);
+  line-height: 1.4;
+}
+
+.cz-block {
+  display: grid;
+  gap: var(--s-3);
+}
+
+.cz-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line-strong);
+  color: var(--ink);
+}
+
+.cz-help {
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+
+.cz-done {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-sm);
+  font-weight: 500;
+}
+
+.cz-list,
+.rules {
+  list-style: none;
+}
+
+.cz-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'text amount'
+    'select select';
+  align-items: center;
+  gap: 6px var(--s-3);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: var(--fs-sm);
+}
+
+@media (min-width: 480px) {
+  .cz-item {
+    grid-template-columns: minmax(0, 1fr) auto 150px;
+    grid-template-areas: 'text amount select';
+  }
+}
+
+.cz-item__text {
+  grid-area: text;
+  display: grid;
+  min-width: 0;
+}
+
+.cz-item__merchant {
+  font-weight: 500;
+}
+
+.cz-item__raw {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cz-item__amount {
+  grid-area: amount;
+}
+
+.cz-item .cat-select {
+  grid-area: select;
+  justify-self: start;
+}
+
+@media (min-width: 480px) {
+  .cz-item .cat-select {
+    justify-self: stretch;
+  }
+}
+
+.cz-more {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+  padding: 8px 0;
+}
+
+.cz-form__foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--s-1);
+}
+
+/* Rules: collapsed by default, a reference list rather than the main task. */
+.cz-rules > summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.cz-rules > summary::-webkit-details-marker {
+  display: none;
+}
+
+.cz-rules > summary svg {
+  color: var(--ink-3);
+  transition: transform var(--t) var(--ease);
+}
+
+.cz-rules[open] > summary svg {
+  transform: rotate(180deg);
+}
+
+.rule {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--s-3);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.rule__body {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.rule__pattern {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rule__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
+
+.cz-reset {
+  margin-top: var(--s-3);
+  color: var(--ink-2);
+}
+
+.cz-reset.is-armed {
+  color: var(--negative);
+  text-decoration-color: currentColor;
+}
+
+.cz-ai__run {
+  justify-self: start;
+}

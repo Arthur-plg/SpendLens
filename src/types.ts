@@ -7,6 +7,7 @@ export interface Transaction {
   monthKey: string; // e.g. 2026-10
   monthLabel: string; // e.g. "Octobre 2026"
   rawLabel: string; // Original bank description
+  extractedMerchant?: string; // Merchant name parsed from the label, before rule overrides
   cleanMerchant: string; // Cleaned merchant name
   amount: number; // Signed: negative for debit, positive for credit
   absAmount: number;
@@ -22,8 +23,6 @@ export interface CategoryDefinition {
   id: string;
   name: string;
   color: string;
-  bgLight: string;
-  iconName: string;
   isIncome?: boolean;
   isTransfer?: boolean;
 }
