@@ -57,6 +57,8 @@ type Source = 'demo' | 'file';
 const FORMAT_HELP =
   'Le fichier doit avoir les colonnes Date, Libellé et Débit/Crédit (ou Montant), comme l’export Excel du Crédit Agricole.';
 
+class ReaderUnavailableError extends Error {}
+
 function viewFromHash(): View | null {
   const id = window.location.hash.slice(1);
   return VIEWS.some((v) => v.id === id) ? (id as View) : null;
@@ -165,7 +167,14 @@ export function App() {
   const ingest = useCallback(
     async (buffer: ArrayBuffer, from: Source): Promise<Transaction[] | null> => {
       const seq = ++loadSeq.current;
-      const { parseBankStatement } = await import('./utils/parser');
+      let parser: typeof import('./utils/parser');
+      try {
+        parser = await import('./utils/parser');
+      } catch {
+        // The reader is a lazy chunk: it fails when the server is gone or the app was updated meanwhile.
+        throw new ReaderUnavailableError();
+      }
+      const { parseBankStatement } = parser;
       const result = parseBankStatement(buffer, rulesRef.current);
       // A newer load (another drop, the demo) wins.
       if (seq !== loadSeq.current) return null;
@@ -211,8 +220,14 @@ export function App() {
           setToast({
             message: `Relevé chargé : ${plural(txs.length, 'opération', 'opérations')}, du ${dateLong(first)} au ${dateLong(last)}.${hadData ? ' Il remplace le précédent.' : ''}`,
           });
-        } catch {
-          setToast({ message: `Fichier illisible. ${FORMAT_HELP}`, tone: 'error' });
+        } catch (err) {
+          setToast({
+            message:
+              err instanceof ReaderUnavailableError
+                ? 'Le lecteur de fichiers n’a pas pu se charger. Rechargez la page, puis réessayez.'
+                : `Fichier illisible. ${FORMAT_HELP}`,
+            tone: 'error',
+          });
         } finally {
           setImporting(false);
         }
