@@ -65,22 +65,42 @@ export function App() {
   // Auto-load sample data on startup
   useEffect(() => {
     fetch('/sample-ca.xlsx')
-      .then(res => res.arrayBuffer())
+      .then(res => {
+        if (!res.ok) throw new Error('No local sample file');
+        return res.arrayBuffer();
+      })
       .then(buffer => {
         const result = parseBankStatement(buffer);
-        setTransactions(result.transactions);
-        setAccountInfo(result.accountInfo);
         if (result.transactions.length > 0) {
+          setTransactions(result.transactions);
+          setAccountInfo(result.accountInfo);
           const months = Array.from(new Set(result.transactions.map(t => t.monthKey))).sort();
           if (months.length > 0) {
             setSelectedMonthKey(months[months.length - 1]);
           }
         }
       })
-      .catch(err => {
-        console.error('Failed to load sample dataset:', err);
+      .catch(() => {
+        // Normal when sample-ca.xlsx is not present
       });
   }, []);
+
+  const loadMockDemoData = () => {
+    const mockTxs: Transaction[] = [
+      { id: '1', date: '2026-10-23', rawDate: '23/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Paiement par carte - CARREFOUR CITY PARIS', cleanMerchant: 'Carrefour City', amount: -24.50, absAmount: 24.50, type: 'debit', isInternalTransfer: false, category: 'alimentation', categorizationMethod: 'rule' },
+      { id: '2', date: '2026-10-22', rawDate: '22/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Paiement par carte - BISTROT MADAME PARIS', cleanMerchant: 'Bistrot Madame', amount: -42.00, absAmount: 42.00, type: 'debit', isInternalTransfer: false, category: 'restaurants', categorizationMethod: 'rule' },
+      { id: '3', date: '2026-10-20', rawDate: '20/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Prélèvement - ARGAUX IMMO GESTION LOYER', cleanMerchant: 'Argaux Immo', amount: -420.00, absAmount: 420.00, type: 'debit', isInternalTransfer: false, category: 'logement', categorizationMethod: 'rule' },
+      { id: '4', date: '2026-10-18', rawDate: '18/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Paiement par carte - SNCF CONNECT VOYAGEURS', cleanMerchant: 'SNCF', amount: -56.00, absAmount: 56.00, type: 'debit', isInternalTransfer: false, category: 'transports', categorizationMethod: 'rule' },
+      { id: '5', date: '2026-10-15', rawDate: '15/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Paiement par carte - SPOTIFY PREMIUM', cleanMerchant: 'Spotify', amount: -10.99, absAmount: 10.99, type: 'debit', isInternalTransfer: false, category: 'abonnements', categorizationMethod: 'rule' },
+      { id: '6', date: '2026-10-14', rawDate: '14/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Paiement par carte - ORANGE SA FIBRE', cleanMerchant: 'Orange', amount: -29.99, absAmount: 29.99, type: 'debit', isInternalTransfer: false, category: 'abonnements', categorizationMethod: 'rule' },
+      { id: '7', date: '2026-10-10', rawDate: '10/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Paiement par carte - BASIC FIT PARIS', cleanMerchant: 'Basic Fit', amount: -29.99, absAmount: 29.99, type: 'debit', isInternalTransfer: false, category: 'loisirs', categorizationMethod: 'rule' },
+      { id: '8', date: '2026-10-05', rawDate: '05/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Paiement par carte - BITSTACK BITCOIN DCA', cleanMerchant: 'Bitstack', amount: -50.00, absAmount: 50.00, type: 'debit', isInternalTransfer: false, category: 'epargne', categorizationMethod: 'rule' },
+      { id: '9', date: '2026-10-01', rawDate: '01/10/2026', monthKey: '2026-10', monthLabel: 'Octobre 2026', rawLabel: 'Virement en votre faveur - VIREMENT SALAIRE', cleanMerchant: 'Salaire Entreprise', amount: 2150.00, absAmount: 2150.00, type: 'credit', isInternalTransfer: false, category: 'revenus', categorizationMethod: 'rule' },
+    ];
+    setTransactions(mockTxs);
+    setAccountInfo({ holderName: 'Compte Démo', detectedBank: 'Banque Démo' });
+    setSelectedMonthKey('2026-10');
+  };
 
   const handleSaveRule = (newRule: Rule) => {
     const updated = [newRule, ...rules.filter(r => r.id !== newRule.id)];
@@ -430,37 +450,71 @@ export function App() {
         </div>
       </header>
 
-      {/* Primary Month Ribbon Selector */}
-      <div className="month-ribbon-container">
-        <div className="ribbon-label">
-          <Calendar size={15} style={{ color: 'var(--emerald)' }} />
-          <span>Sélectionner le Mois :</span>
-        </div>
-        
-        <div className="month-chips-scroll">
-          {availableMonths.map((m, idx) => {
-            const isCurrent = idx === 0;
-            const isSelected = selectedMonthKey === m.key;
-            return (
+      {transactions.length === 0 ? (
+        <section style={{ textAlign: 'center', padding: '4rem 2rem', background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: 16 }}>
+          <div style={{ maxWidth: 560, margin: '0 auto' }}>
+            <div className="brand-logo-icon" style={{ width: 56, height: 56, fontSize: '1.6rem', margin: '0 auto 1.5rem' }}>SL</div>
+            <h1 style={{ fontSize: '1.6rem', fontWeight: 700, marginBottom: '0.75rem', color: '#ffffff' }}>
+              Bienvenue sur SpendLens
+            </h1>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', marginBottom: '2rem', lineHeight: 1.6 }}>
+              Analyseur de relevés bancaires 100% local, privé et déterministe. Vos données ne quittent jamais votre machine.
+            </p>
+
+            <label className="upload-dropzone" style={{ display: 'block', marginBottom: '1.25rem' }}>
+              <UploadCloud size={38} style={{ color: 'var(--emerald)', marginBottom: '0.75rem' }} />
+              <div style={{ fontWeight: 600, fontSize: '1rem', color: '#ffffff', marginBottom: '0.25rem' }}>
+                Importer un relevé bancaire
+              </div>
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+                Formats acceptés : Excel (.xlsx, .xls) ou CSV (Crédit Agricole, BoursoBank, etc.)
+              </div>
+              <input type="file" accept=".xlsx,.xls,.csv" onChange={handleFileUpload} style={{ display: 'none' }} />
+            </label>
+
+            <button
+              onClick={loadMockDemoData}
+              className="view-tab-btn"
+              style={{ margin: '0 auto', border: '1px solid var(--border-active)', padding: '0.65rem 1.25rem' }}
+            >
+              <Sparkles size={16} style={{ color: 'var(--cyan)' }} />
+              <span>Tester avec des données de démonstration</span>
+            </button>
+          </div>
+        </section>
+      ) : (
+        <>
+          {/* Primary Month Ribbon Selector */}
+          <div className="month-ribbon-container">
+            <div className="ribbon-label">
+              <Calendar size={15} style={{ color: 'var(--emerald)' }} />
+              <span>Sélectionner le Mois :</span>
+            </div>
+            
+            <div className="month-chips-scroll">
+              {availableMonths.map((m, idx) => {
+                const isCurrent = idx === 0;
+                const isSelected = selectedMonthKey === m.key;
+                return (
+                  <button
+                    key={m.key}
+                    onClick={() => setSelectedMonthKey(m.key)}
+                    className={`month-chip ${isSelected ? 'active' : ''} ${isCurrent ? 'current' : ''}`}
+                  >
+                    {isCurrent ? `Dernier mois (${m.label})` : m.label}
+                  </button>
+                );
+              })}
+              
               <button
-                key={m.key}
-                onClick={() => setSelectedMonthKey(m.key)}
-                className={`month-chip ${isSelected ? 'active' : ''} ${isCurrent ? 'current' : ''}`}
+                onClick={() => setSelectedMonthKey('all')}
+                className={`month-chip ${selectedMonthKey === 'all' ? 'active' : ''}`}
+                style={{ borderLeft: '1px solid var(--border-subtle)', marginLeft: '0.4rem', paddingLeft: '0.8rem' }}
               >
-                {isCurrent ? `Dernier mois (${m.label})` : m.label}
+                Moyenne Mensuelle Lissée (12 mois)
               </button>
-            );
-          })}
-          
-          <button
-            onClick={() => setSelectedMonthKey('all')}
-            className={`month-chip ${selectedMonthKey === 'all' ? 'active' : ''}`}
-            style={{ borderLeft: '1px solid var(--border-subtle)', marginLeft: '0.4rem', paddingLeft: '0.8rem' }}
-          >
-            Moyenne Mensuelle Lissée (12 mois)
-          </button>
-        </div>
-      </div>
+            </div>
+          </div>
 
       {/* Views Navigation Tabs */}
       <nav className="view-nav">
@@ -883,6 +937,8 @@ export function App() {
             ))}
           </div>
         </section>
+      )}
+        </>
       )}
 
       {/* Modals */}
