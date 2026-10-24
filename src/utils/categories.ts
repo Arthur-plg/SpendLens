@@ -67,7 +67,7 @@ export const DEFAULT_RULES: Rule[] = [
   // 4. Logement, Loyers, Charges & Assurances
   {
     id: 'rule_logement_loyer',
-    pattern: 'loyer|bail|charges copro|maif|edf|engie|totalenergies|veolia|assurance habitation',
+    pattern: 'loyer|bail|charges copro|maif|edf|engie|totalenergies|veolia|assurance habitation|argaux',
     isRegex: true,
     categoryId: 'logement',
     priority: 90,
@@ -106,7 +106,7 @@ export const DEFAULT_RULES: Rule[] = [
   // 6. Transports, Voyages, Mobilité & Gares (Uber VTC excluant Uber Eats)
   {
     id: 'rule_transports_mobility',
-    pattern: 'sncf|ratp|navigo|trainline|idtgv|\\bter\\b|ouigo|transports en commun|uber(?!.*eats)|ubr\\*(?!.*eats)|bolt|lime|\\btier\\b|dott|\\bvoi\\b|velib|total|shell|\\bbp\\b|esso|peage|aprr|vinci autoroutes|parking|air france|transavia|easyjet|ryanair|lufthansa|vueling|aeroport|orly|metro',
+    pattern: 'sncf|ratp|navigo|trainline|idtgv|\\bter\\b|ouigo|transports en commun|tcl|spl relation|relay|relais h|uber(?!.*eats)|ubr\\*(?!.*eats)|bolt|lime|\\btier\\b|dott|\\bvoi\\b|velib|total|shell|\\bbp\\b|esso|peage|aprr|vinci autoroutes|parking|air france|transavia|easyjet|ryanair|lufthansa|vueling|aeroport|orly|metro',
     isRegex: true,
     categoryId: 'transports',
     priority: 85,
@@ -134,7 +134,7 @@ export const DEFAULT_RULES: Rule[] = [
   // 8. Alimentation & Supermarchés
   {
     id: 'rule_alimentation_courses',
-    pattern: 'carrefour|monoprix|franprix|lidl|auchan|leclerc|aldi|intermarche|naturalia|picard|bio c bon|super u|u express|casino|boulangerie|boulanger|paul|kayser|crous|superette|marche |epicerie|primeur|biocoop|grand frais',
+    pattern: 'carrefour|monoprix|franprix|lidl|auchan|leclerc|aldi|intermarche|naturalia|picard|bio c bon|super u|u express|casino|petit casino|boulangerie|boulanger|paul|kayser|victoris|mk mail|crous|ru ecole|superette|marche |epicerie|primeur|biocoop|grand frais|la civette de croissy',
     isRegex: true,
     categoryId: 'alimentation',
     priority: 83,
@@ -144,7 +144,7 @@ export const DEFAULT_RULES: Rule[] = [
   // 9. Restaurants, Bars, Cafés & Street Food
   {
     id: 'rule_restaurants_bars',
-    pattern: "bistrot|restaurant|resto|brasserie|bistro|ramen|\\bpho\\b|sushi|pizzeria|pizza|burger|mcdonald|kfc|starbucks|cafe|café|\\bbar\\b|\\bpub\\b|creperie|traiteur|cantine|tacos|kebab|boulangerie patisserie|snack",
+    pattern: "bistrot|restaurant|resto|brasserie|bistro|ramen|\\bpho\\b|sushi|pizzeria|pizza|burger|mcdonald|kfc|starbucks|cafe|café|\\bbar\\b|\\bpub\\b|creperie|traiteur|cantine|tacos|kebab|boulangerie patisserie|snack|forzacafe|konoha|newrest|yose|maelvina|bistrot madame|so noodles|selecta|ivs",
     isRegex: true,
     categoryId: 'restaurants',
     priority: 80,
@@ -164,7 +164,7 @@ export const DEFAULT_RULES: Rule[] = [
   // 11. Loisirs, Sport & Shopping
   {
     id: 'rule_loisirs_sports',
-    pattern: "basic fit|fitness park|neoness|wellpass|decathlon|cinema|ugc|pathe|gaumont|escalade|coiffure|coiffeur|fnac|vinted|tabac|presse|uniqlo|zara|h&m|spectacle|concert",
+    pattern: "basic fit|fitness park|neoness|wellpass|decathlon|cinema|ugc|pathe|gaumont|escalade|coiffure|coiffeur|fnac|vinted|tabac|presse|uniqlo|zara|h&m|spectacle|concert|urbansoccer|winamax",
     isRegex: true,
     categoryId: 'loisirs',
     priority: 78,
