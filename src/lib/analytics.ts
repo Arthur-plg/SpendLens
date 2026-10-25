@@ -47,7 +47,7 @@ export function isReal(t: Transaction): boolean {
 }
 
 /** Spending categories in which an incoming payment can only be a refund (health reimbursement, travel credit…). */
-const REFUNDABLE = new Set(['alimentation', 'restaurants', 'transports', 'logement', 'abonnements', 'loisirs', 'sante', 'frais_bancaires']);
+const REFUNDABLE = new Set(['alimentation', 'restaurants', 'transports', 'voyages', 'shopping', 'logement', 'abonnements', 'loisirs', 'sante', 'impots', 'frais_bancaires']);
 
 /**
  * How a real transaction affects the budget:
@@ -181,7 +181,7 @@ export function largestExpenses(items: Transaction[], limit = 5): Transaction[] 
 }
 
 /** Categories where a repeated merchant is a habit, not a fixed charge. */
-const HABIT_CATEGORIES = new Set(['alimentation', 'restaurants', 'transports', 'epargne', 'proches_amis']);
+const HABIT_CATEGORIES = new Set(['alimentation', 'restaurants', 'transports', 'voyages', 'shopping', 'epargne', 'proches_amis']);
 /** Categories where anything that repeats is by nature a fixed charge. */
 const FIXED_CATEGORIES = new Set(['logement', 'abonnements', 'frais_bancaires']);
 

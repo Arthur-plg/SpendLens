@@ -104,6 +104,9 @@
   --cat-alimentation: #183ad3;
   --cat-restaurants: #6f8cff;
   --cat-transports: #00a383;
+  --cat-voyages: #0b6e5c;
+  --cat-shopping: #9fb0e8;
+  --cat-impots: #5c6378;
   --cat-loisirs: #b3c4ff;
   --cat-abonnements: #3e4766;
   --cat-epargne: #00dfa8;
@@ -152,6 +155,9 @@
   --cat-alimentation: #5d7cff;
   --cat-restaurants: #2a46e0;
   --cat-transports: #00c99a;
+  --cat-voyages: #7fe0c8;
+  --cat-shopping: #a9b6ff;
+  --cat-impots: #9aa0b4;
   --cat-loisirs: #8ea4ff;
   --cat-abonnements: #f2f3f7;
   --cat-epargne: #00735c;

@@ -6,6 +6,7 @@ import type { ClassificationStats } from '../lib/analytics';
 import { count, euros, percent, plural } from '../lib/format';
 import { DEFAULT_CATEGORIES, getCategory } from '../utils/categories';
 import { matchText, ruleMatcher } from '../utils/rules';
+import { knowledgeSize } from '../utils/engine';
 import { Drawer } from './overlays';
 import { CategoryLabel, CategorySelect } from './ui';
 import { Bar } from './charts';
@@ -180,7 +181,7 @@ export function CategorizationDrawer(props: CategorizationDrawerProps) {
 
       <details className="cz-block cz-rules">
         <summary className="cz-head eyebrow">
-          <span>Règles · {rules.length}</span>
+          <span>Vos règles · {rules.length}</span>
           <ChevronDown size={14} strokeWidth={1.75} aria-hidden="true" />
         </summary>
         <input
@@ -215,7 +216,13 @@ export function CategorizationDrawer(props: CategorizationDrawerProps) {
               </button>
             </li>
           ))}
-          {visibleRules.length === 0 && <li className="cz-more">Aucune règle ne correspond.</li>}
+          {visibleRules.length === 0 && (
+            <li className="cz-more">
+              {rules.length === 0
+                ? `Aucune règle pour l’instant. SpendLens reconnaît déjà ${count(knowledgeSize())} commerçants et enseignes ; ajoutez une règle pour ceux qu’il ne connaît pas.`
+                : 'Aucune règle ne correspond.'}
+            </li>
+          )}
         </ul>
         <div aria-live="polite">
           <button
@@ -231,7 +238,7 @@ export function CategorizationDrawer(props: CategorizationDrawerProps) {
               }
             }}
           >
-            {confirmReset ? 'Confirmer : remplacer mes règles par celles d’origine' : 'Rétablir les règles d’origine'}
+            {confirmReset ? 'Confirmer\u00a0: supprimer toutes mes règles' : 'Supprimer toutes mes règles'}
           </button>
         </div>
       </details>
