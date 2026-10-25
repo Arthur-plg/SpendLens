@@ -68,21 +68,43 @@ function daysInMonth(key: string): number {
   return new Date(y, m, 0).getDate();
 }
 
+/**
+ * Salary income received at end-of-month is budgeted for the following month.
+ * Threshold: >= 25th of the month (>= 23rd for February).
+ * Only applies to transactions in the 'revenus' category (salary, wages).
+ * Other income (refunds, gifts, etc.) keeps its real date.
+ */
+function budgetMonthKey(t: Transaction): string {
+  if (t.category !== 'revenus') return t.monthKey;
+  const day = Number(t.date.slice(8, 10));
+  const month = Number(t.date.slice(5, 7));
+  const threshold = month === 2 ? 23 : 25;
+  if (day < threshold) return t.monthKey;
+  // Shift to next month
+  const year = Number(t.date.slice(0, 4));
+  const nextMonth = month === 12 ? 1 : month + 1;
+  const nextYear = month === 12 ? year + 1 : year;
+  return `${nextYear}-${String(nextMonth).padStart(2, '0')}`;
+}
+
 export function summarizeMonths(transactions: Transaction[]): MonthSummary[] {
   const real = transactions.filter(isReal);
   if (real.length === 0) return [];
 
   const map = new Map<string, MonthSummary>();
   for (const t of real) {
-    const m = map.get(t.monthKey) ?? { key: t.monthKey, expenses: 0, income: 0, invested: 0, net: 0, rate: NaN, count: 0, partial: false };
     const r = role(t);
+    // Salary income uses the budget month (shifted to next month if received end-of-month).
+    // All other transactions use their actual month.
+    const key = r === 'income' ? budgetMonthKey(t) : t.monthKey;
+    const m = map.get(key) ?? { key, expenses: 0, income: 0, invested: 0, net: 0, rate: NaN, count: 0, partial: false };
     if (r === 'income') m.income += t.absAmount;
     else if (r === 'invested') m.invested += t.absAmount;
     else if (r === 'withdrawn') m.invested -= t.absAmount;
     else if (r === 'spend') m.expenses += t.absAmount;
     else m.expenses -= t.absAmount;
     m.count += 1;
-    map.set(t.monthKey, m);
+    map.set(key, m);
   }
 
   const dates = transactions.map((t) => t.date).sort();
