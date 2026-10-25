@@ -21,7 +21,7 @@ export interface Classification {
 /* ---------- Text preparation ---------- */
 
 /** Payment rails that prefix the real merchant: "ALP*Family Mart", "SumUp *Atrois", "PAYPAL *NETFLIX". */
-const RAIL = /^(?:alp|alipay|weixin|wechat|wxp|wx|kpay|ant|mp|paypal|pp|sumup|sum up|sq|zettle|izettle|stripe|nyx|lyf|sp|tst|mollie|payplug|ccv|viva|dojo|hipay|adyen|google|apple pay|gpay)\s*\*\s*/i;
+const RAIL = /^(?:alp|alipay|weixin|wechat|wxp|wx|kpay|ant|mp+|bkg|paypal|pp|sumup|sum up|sq|zettle|izettle|stripe|nyx|lyf|sp|tst|mollie|payplug|ccv|viva|dojo|hipay|adyen|google|apple pay|gpay)\s*\*\s*/i;
 
 /** Lowercase, accent-free, punctuation as spaces; camelCase split ("OtherRetail" → "other retail"). */
 export function tokens(text: string, splitCamel = true): string[] {
@@ -144,10 +144,31 @@ const STEMS: [string, string][] = [
   ['naicha', 'restaurants'], ['chaguan', 'restaurants'], ['jiaozi', 'restaurants'], ['baozi', 'restaurants'], ['malatang', 'restaurants'],
   ['chaoshi', 'alimentation'], ['bianli', 'alimentation'], ['shuiguo', 'alimentation'], ['shipin', 'alimentation'], ['caishichang', 'alimentation'],
   ['yaodian', 'sante'], ['yaofang', 'sante'], ['yiyuan', 'sante'], ['zhensuo', 'sante'],
-  ['jiudian', 'voyages'], ['binguan', 'voyages'], ['kezhan', 'voyages'], ['luguan', 'voyages'],
+  ['jiudian', 'voyages'], ['binguan', 'voyages'], ['jichang', 'voyages'], ['kezhan', 'voyages'], ['luguan', 'voyages'],
   ['baihuo', 'shopping'], ['shangcheng', 'shopping'], ['youpin', 'shopping'], ['fuzhuang', 'shopping'],
   ['jianshen', 'loisirs'], ['dianying', 'loisirs'], ['yingcheng', 'loisirs'], ['bowuguan', 'loisirs'], ['meifa', 'loisirs'], ['anmo', 'loisirs'],
 ];
+
+/** Prefixes of trade words, matched at the start of any word. */
+const ROOTS: [string, string][] = [
+  ['pharma', 'sante'], ['parapharm', 'sante'], ['optic', 'sante'], ['dentair', 'sante'],
+  ['boulang', 'alimentation'], ['patiss', 'alimentation'], ['boucher', 'alimentation'], ['fromag', 'alimentation'], ['primeur', 'alimentation'],
+  ['epicer', 'alimentation'], ['supermerc', 'alimentation'], ['panader', 'alimentation'], ['carnicer', 'alimentation'], ['fruter', 'alimentation'],
+  ['restau', 'restaurants'], ['pizz', 'restaurants'], ['sushi', 'restaurants'], ['burger', 'restaurants'], ['kebab', 'restaurants'],
+  ['brasser', 'restaurants'], ['bistro', 'restaurants'], ['creper', 'restaurants'], ['trattor', 'restaurants'], ['taqueri', 'restaurants'],
+  ['cervecer', 'restaurants'], ['cafeter', 'restaurants'], ['brunch', 'restaurants'], ['ramen', 'restaurants'], ['noodle', 'restaurants'],
+  ['hostal', 'voyages'], ['hotel', 'voyages'], ['camping', 'voyages'],
+  ['librair', 'shopping'], ['llibrer', 'shopping'], ['librer', 'shopping'], ['papeter', 'shopping'], ['bijout', 'shopping'], ['fleuris', 'shopping'],
+  ['coiff', 'loisirs'], ['barber', 'loisirs'], ['cinem', 'loisirs'], ['fitness', 'loisirs'], ['escalad', 'loisirs'], ['climbing', 'loisirs'],
+];
+
+function lookupRoot(text: string): string | null {
+  for (const word of tokens(text, false)) {
+    if (word.length < 4) continue;
+    for (const [root, category] of ROOTS) if (word.startsWith(root)) return category;
+  }
+  return null;
+}
 
 function lookupStem(text: string): string | null {
   for (const word of tokens(text, false)) {
@@ -191,11 +212,14 @@ const SALARY = /salaire|\bpaie\b|remuneration|traitement|\bprime\b|indemnit|pole
 const PERSON = /\b(m|mme|mlle|mr|monsieur|madame|mademoiselle|m ou mme)\b\.?\s+[a-z]|wero|lydia|paylib|vir inst|vir sepa/i;
 const COMPANY = /\b(sas|sarl|sa|eurl|sasu|sci|gie|ltd|gmbh|inc|llc)\b/i;
 
+/** Bank fee wording, wherever it sits in the line ("Prélèvement - FRAIS IRREG.ET INCIDENTS"). */
+const FEES = /frais irreg|frais d incident|incidents? de paiement|commission d intervention|agios|interets debiteurs|cotisation (carte|offre|mensuelle|annuelle)|frais de tenue/;
+
 function structural(line: PreparedLine, type: TransactionType): Classification | null {
   const text = normalize(line.head);
   if (INTERNAL.test(text)) return { category: 'virement_interne', method: 'rule', ruleId: 'struct:internal' };
   if (line.kind === 'withdrawal') return { category: 'frais_bancaires', method: 'rule', ruleId: 'struct:withdrawal' };
-  if (line.kind === 'fee') return { category: 'frais_bancaires', method: 'rule', ruleId: 'struct:fee' };
+  if (line.kind === 'fee' || FEES.test(text)) return { category: 'frais_bancaires', method: 'rule', ruleId: 'struct:fee' };
   if (type === 'credit' && SALARY.test(text)) return { category: 'revenus', method: 'rule', ruleId: 'struct:salary' };
   return null;
 }
@@ -237,9 +261,15 @@ export function classify(label: string, type: TransactionType, merchant: string,
 
   // 3. Known merchants: the bank's display name, then the merchant text, then the whole line.
   const hit = lookupText(line.display) ?? lookupText(line.merchant) ?? lookupText(merchant) ?? lookupText(line.head);
-  if (hit && !(hit.category === 'revenus' && type !== 'credit')) {
-    return { category: hit.category, method: 'rule', ruleId: `kb:${hit.phrase}` };
+  if (hit) {
+    // A debit to an income source (repaying the CAF, France Travail) is administration, not income.
+    const category = hit.category === 'revenus' && type !== 'credit' ? 'impots' : hit.category;
+    return { category, method: 'rule', ruleId: `kb:${hit.phrase}` };
   }
+
+  // Word roots that say what the shop is, even in names we don't know ("PHARMA ST JOSEPH", "BOULANG DU PONT").
+  const root = lookupRoot(`${line.display} ${line.merchant}`);
+  if (root) return { category: root, method: 'rule', ruleId: 'kb:root' };
 
   // 4. Glued pinyin names from Alipay / WeChat Pay.
   const stem = lookupStem(`${line.merchant} ${line.display}`);
