@@ -9,22 +9,15 @@ const STORAGE_KEYS = {
   EXCLUDE_TRANSFERS: 'spendlens_exclude_transfers',
 };
 
+/** Rules people created themselves (or accepted from the AI). Old built-in rules are dropped: the engine now carries that knowledge. */
+const isUserRule = (r: Rule) => r.id.startsWith('rule_custom_') || r.id.startsWith('rule_groq_');
+
 export function getStoredRules(): Rule[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.RULES);
     if (!raw) return DEFAULT_RULES;
     const parsed: Rule[] = JSON.parse(raw);
-    if (!Array.isArray(parsed) || parsed.length === 0) return DEFAULT_RULES;
-    // Built-in rules always use their current definition (they cannot be edited in the UI);
-    // custom and AI rules are kept as saved, and built-ins added since are appended.
-    const builtIn = new Map(DEFAULT_RULES.map((d) => [d.id, d]));
-    const merged = parsed.map((r) => builtIn.get(r.id) ?? r);
-    const known = new Set(parsed.map((r) => r.id));
-    for (const id of ['rule_food_delivery', 'rule_sante_remboursements']) {
-      const rule = builtIn.get(id);
-      if (rule && !known.has(id)) merged.push(rule);
-    }
-    return merged;
+    return Array.isArray(parsed) ? parsed.filter(isUserRule) : DEFAULT_RULES;
   } catch {
     return DEFAULT_RULES;
   }

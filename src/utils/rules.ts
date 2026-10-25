@@ -1,10 +1,8 @@
 import type { Rule, Transaction, TransactionType } from '../types';
-import { DEFAULT_RULES } from './categories';
+import { classify, flagSubscriptions, normalize, prepare } from './engine';
+import type { Classification } from './engine';
 
-/** Lowercase and strip accents: bank labels are uppercase ASCII ("CAFE"), people type "café". */
-export function normalize(text: string): string {
-  return text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
-}
+export { matchText, normalize, ruleMatcher } from './engine';
 
 /** Dates, SEPA mandates and long reference numbers are not merchant names. */
 const NOT_A_NAME = /\d{2}[-/]\d{2}[-/]\d{2,4}|mandat|\d{6,}/i;
@@ -40,57 +38,22 @@ export function extractCleanMerchant(rawLabel: string): string {
     return `Virement de ${sub}`;
   }
 
-  // "Paiement par carte - X5912 <NOM> <VILLE> <DATE>"
-  const cardMatch = label.match(/Paiement par carte\s*-\s*X\d+\s+([A-Z0-9\s*.'-]+?)(?:\s+\d{2}\/\d{2}|$)/i);
-  if (cardMatch && cardMatch[1] && cardMatch[1].trim().length > 2) {
-    return cardMatch[1].trim();
+  // "Paiement par carte - X5912 <NOM> <VILLE> <DATE>", payment rail prefix removed ("ALP*", "SumUp *")
+  const line = prepare(label);
+  if (line.kind === 'fee' || line.kind === 'withdrawal') {
+    const text = (parts[parts.length - 1] ?? label).toLowerCase();
+    return text.charAt(0).toUpperCase() + text.slice(1);
   }
+  if (line.kind === 'card' && line.merchant.length > 2) return line.merchant;
 
   return label.length > 35 ? `${label.slice(0, 34)}…` : label;
 }
 
-/** Text a rule is matched against: the full label plus the extracted merchant, accent-free. */
-export function matchText(label: string, merchant: string): string {
-  return normalize(`${label} ${merchant}`);
-}
-
-/** Builds the predicate for one rule, or null if the rule is a broken regex. */
-export function ruleMatcher(pattern: string, isRegex = false): ((text: string) => boolean) | null {
-  if (isRegex) {
-    try {
-      // Strip accents but keep case: lowercasing would turn \S or \W into different escapes.
-      const re = new RegExp(pattern.normalize('NFD').replace(/\p{Diacritic}/gu, ''), 'i');
-      return (text) => re.test(text);
-    } catch {
-      return null;
-    }
-  }
-  const needle = normalize(pattern.trim());
-  return needle ? (text) => text.includes(needle) : null;
-}
-
 /**
- * Apply deterministic rules to a transaction
+ * Classify one bank line: the user's rules, then the line's structure, then the merchant knowledge base.
  */
-export function categorizeTransaction(
-  label: string,
-  type: TransactionType,
-  cleanMerchant: string,
-  rules: Rule[] = DEFAULT_RULES,
-): { category: string; method: 'rule' | 'default'; ruleId?: string; overrideMerchant?: string } {
-  const text = matchText(label, cleanMerchant);
-  const sortedRules = [...rules].sort((a, b) => (b.priority || 0) - (a.priority || 0));
-
-  for (const rule of sortedRules) {
-    // Debits can never match revenus rules
-    if (rule.categoryId === 'revenus' && type !== 'credit') continue;
-    const test = ruleMatcher(rule.pattern, rule.isRegex) ?? ruleMatcher(rule.pattern, false);
-    if (test?.(text)) {
-      return { category: rule.categoryId, method: 'rule', ruleId: rule.id, overrideMerchant: rule.targetMerchantName };
-    }
-  }
-
-  return type === 'credit' ? { category: 'revenus', method: 'default' } : { category: 'autre', method: 'default' };
+export function categorizeTransaction(label: string, type: TransactionType, cleanMerchant: string, rules: Rule[] = []): Classification {
+  return classify(label, type, cleanMerchant, rules);
 }
 
 /**
@@ -98,7 +61,7 @@ export function categorizeTransaction(
  * manual and AI decisions intact.
  */
 export function recategorize(transactions: Transaction[], rules: Rule[]): Transaction[] {
-  return transactions.map((t) => {
+  const updated = transactions.map((t) => {
     if (t.categorizationMethod === 'manual' || t.categorizationMethod === 'ai') return t;
     const base = t.extractedMerchant ?? t.cleanMerchant;
     const result = categorizeTransaction(t.rawLabel, t.type, base, rules);
@@ -110,6 +73,7 @@ export function recategorize(transactions: Transaction[], rules: Rule[]): Transa
       ruleMatched: result.ruleId,
     };
   });
+  return flagSubscriptions(updated, payeeKey);
 }
 
 /** Groups lines from the same payee: direct debits by creditor (their display name varies), the rest by merchant. */

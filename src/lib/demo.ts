@@ -1,5 +1,6 @@
 import type { AccountInfo, Rule, Transaction } from '../types';
-import { categorizeTransaction, extractCleanMerchant } from '../utils/rules';
+import { categorizeTransaction, extractCleanMerchant, payeeKey } from '../utils/rules';
+import { flagSubscriptions } from '../utils/engine';
 
 /**
  * A fictional statement covering the last twelve months plus the current one,
@@ -163,7 +164,7 @@ function buildLines(today: Date): Line[] {
 
 export function buildDemo(rules: Rule[], today = new Date()): Transaction[] {
   const internal = /intercompte|compte a compte|vers livret|de livret/i;
-  return buildLines(today)
+  const lines = buildLines(today)
     .sort((a, b) => b.date.getTime() - a.date.getTime())
     .map((line, i) => {
       const y = line.date.getFullYear();
@@ -192,4 +193,5 @@ export function buildDemo(rules: Rule[], today = new Date()): Transaction[] {
         ruleMatched: result.ruleId,
       };
     });
+  return flagSubscriptions(lines, payeeKey);
 }
