@@ -1,7 +1,8 @@
 import * as XLSX from 'xlsx';
 import type { Transaction, AccountInfo, Rule, TransactionType } from '../types';
 import { DEFAULT_RULES } from './categories';
-import { categorizeTransaction, extractCleanMerchant } from './rules';
+import { categorizeTransaction, extractCleanMerchant, payeeKey } from './rules';
+import { flagSubscriptions } from './engine';
 
 const MONTH_NAMES_FR = [
   'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
@@ -230,5 +231,5 @@ export function parseBankStatement(fileData: ArrayBuffer | Uint8Array, rules: Ru
   // Sort by date descending
   transactions.sort((a, b) => b.date.localeCompare(a.date));
 
-  return { transactions, accountInfo };
+  return { transactions: flagSubscriptions(transactions, payeeKey), accountInfo };
 }

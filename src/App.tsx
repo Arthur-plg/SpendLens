@@ -317,7 +317,7 @@ export function App() {
 
   const resetRules = () => {
     applyRules(DEFAULT_RULES);
-    setToast({ message: 'Règles d’origine rétablies.' });
+    setToast({ message: 'Vos règles ont été supprimées.' });
   };
 
   const changeCategory = (tx: Transaction, categoryId: string) => {
