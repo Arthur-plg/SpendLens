@@ -95,6 +95,23 @@ export function App() {
   const [period, setPeriod] = useState<Period>('avg');
   const [filters, setFilters] = useState<TransactionFilters>(EMPTY_FILTERS);
   const [reductions, setReductions] = useState<Record<string, Reduction>>({});
+  const [excludedCategories, setExcludedCategories] = useState<Set<string>>(() => new Set());
+
+  const toggleCategory = useCallback((categoryId: string) => {
+    setExcludedCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(categoryId)) {
+        next.delete(categoryId);
+      } else {
+        next.add(categoryId);
+      }
+      return next;
+    });
+  }, []);
+
+  const resetExcluded = useCallback(() => {
+    setExcludedCategories(new Set());
+  }, []);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isClassifying, setIsClassifying] = useState(false);
@@ -415,20 +432,47 @@ export function App() {
 
   /* ---------- Derived data ---------- */
 
-  const months = useMemo(() => summarizeMonths(transactions), [transactions]);
+  const activeTransactions = useMemo(() => {
+    if (excludedCategories.size === 0) return transactions;
+    return transactions.filter((t) => !excludedCategories.has(t.category));
+  }, [transactions, excludedCategories]);
+
+  const months = useMemo(() => summarizeMonths(activeTransactions), [activeTransactions]);
   const average = useMemo(() => averageMonth(months), [months]);
   const averageCount = averageBasis(months).length;
   const current = period === 'avg' ? average : (months.find((m) => m.key === period) ?? average);
   const scope = useMemo(() => scopeFor(transactions, months, period), [transactions, months, period]);
-  const slices = useMemo(() => categoryBreakdown(scope.items, scope.divisor), [scope]);
-  const largest = useMemo(() => largestExpenses(scope.items), [scope]);
+
+  const slices = useMemo(() => {
+    const raw = categoryBreakdown(scope.items, scope.divisor);
+    const activeTotal = raw
+      .filter((s) => !excludedCategories.has(s.id))
+      .reduce((sum, s) => sum + s.amount, 0);
+
+    return raw.map((s) => {
+      const isExcluded = excludedCategories.has(s.id);
+      return {
+        ...s,
+        isExcluded,
+        share: isExcluded ? 0 : (activeTotal > 0 ? (s.amount / activeTotal) * 100 : 0),
+      };
+    });
+  }, [scope, excludedCategories]);
+
+  const largest = useMemo(() => {
+    const activeItems = scope.items.filter((t) => !excludedCategories.has(t.category));
+    return largestExpenses(activeItems);
+  }, [scope, excludedCategories]);
+
   // The simulator always reasons on a typical month, never on a partial one.
   const averageSlices = useMemo(() => {
     const avg = scopeFor(transactions, months, 'avg');
     return categoryBreakdown(avg.items, avg.divisor);
   }, [transactions, months]);
   const recurring = useMemo(() => detectRecurring(transactions), [transactions]);
-  const fixedMonthly = recurring.filter((c) => c.active).reduce((s, c) => s + c.monthly, 0);
+  const fixedMonthly = recurring
+    .filter((c) => c.active && !excludedCategories.has(c.categoryId))
+    .reduce((s, c) => s + c.monthly, 0);
   const stats = useMemo(() => classificationStats(transactions), [transactions]);
   const unclassified = useMemo(() => {
     const seen = new Set<string>();
@@ -538,6 +582,10 @@ export function App() {
                 goTo('transactions');
               }}
               onOpenFixed={() => goTo('recurring')}
+              onSelectMonth={selectMonth}
+              excludedCategories={excludedCategories}
+              onToggleCategory={toggleCategory}
+              onResetExcluded={resetExcluded}
             />
           </>
         );

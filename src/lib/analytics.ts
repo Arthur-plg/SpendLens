@@ -27,6 +27,7 @@ export interface CategorySlice {
   share: number;
   count: number;
   topMerchants: { name: string; amount: number }[];
+  isExcluded?: boolean;
 }
 
 export interface RecurringCharge {

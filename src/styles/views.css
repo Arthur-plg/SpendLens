@@ -146,6 +146,105 @@
   list-style: none;
 }
 
+.cat-table__row-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  border-bottom: 1px solid var(--line);
+}
+
+.cat-table__row-wrapper .cat-row {
+  border-bottom: none;
+  flex: 1;
+  min-width: 0;
+}
+
+.cat-checkbox {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1.5px solid var(--ink-3);
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  color: #080c14;
+  transition: all var(--t-fast) var(--ease);
+}
+
+.cat-checkbox:hover {
+  border-color: var(--spore-mint);
+  background: rgba(0, 245, 155, 0.12);
+}
+
+.cat-checkbox--checked {
+  background: var(--spore-mint);
+  border-color: var(--spore-mint);
+}
+
+.cat-checkbox:focus-visible {
+  outline: 2px solid var(--spore-mint);
+  outline-offset: 2px;
+}
+
+.cat-checkbox__icon {
+  display: block;
+}
+
+.cat-table__item--excluded .cat-row {
+  opacity: 0.45;
+  transition: opacity var(--t-fast) var(--ease);
+}
+
+.cat-table__item--excluded .cat-row:hover {
+  opacity: 0.75;
+}
+
+.cat-table__item--excluded .cat-row__amount {
+  color: var(--ink-3);
+  text-decoration: line-through;
+}
+
+.cat-row__excluded-badge {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--ink-3);
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.cat-table__aside {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cat-table__reset {
+  font-size: var(--fs-xs);
+  color: var(--spore-mint);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 0;
+  font-family: inherit;
+  transition: opacity var(--t-fast) var(--ease);
+}
+
+.cat-table__reset:hover {
+  opacity: 0.8;
+}
+
 .cat-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
