@@ -276,7 +276,7 @@ export function classify(label: string, type: TransactionType, merchant: string,
   if (stem) return { category: stem, method: 'rule', ruleId: 'kb:pinyin' };
 
   // 5. Transfers and defaults.
-  return transferFallback(line, type) ?? (type === 'credit' ? { category: 'revenus', method: 'default' } : { category: 'autre', method: 'default' });
+  return transferFallback(line, type) ?? { category: 'autre', method: 'default' };
 }
 
 /* ---------- Statement-wide pass: subscriptions ---------- */
