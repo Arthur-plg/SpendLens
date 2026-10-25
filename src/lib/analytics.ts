@@ -48,7 +48,7 @@ export function isReal(t: Transaction): boolean {
 }
 
 /** Spending categories in which an incoming payment can only be a refund (health reimbursement, travel credit…). */
-const REFUNDABLE = new Set(['alimentation', 'restaurants', 'transports', 'voyages', 'shopping', 'logement', 'abonnements', 'loisirs', 'sante', 'impots', 'frais_bancaires', 'proches_amis']);
+const REFUNDABLE = new Set(['alimentation', 'restaurants', 'transports', 'voyages', 'shopping', 'logement', 'abonnements', 'loisirs', 'sante', 'impots', 'frais_bancaires']);
 
 /**
  * How a real transaction affects the budget:
