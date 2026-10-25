@@ -628,20 +628,43 @@ select.input,
 .pixel-bars {
   max-width: 100%;
   height: auto;
+  overflow: visible;
+}
+
+.pixel-bars__col--interactive {
+  cursor: pointer;
+  outline: none;
+}
+
+.pixel-bars__col--interactive:hover .pixel-bars__on {
+  opacity: 0.9;
+  filter: brightness(1.25);
+}
+
+.pixel-bars__col--interactive:hover .pixel-bars__off {
+  opacity: 0.22;
+}
+
+.pixel-bars__col--interactive:focus-visible rect:not([fill="transparent"]) {
+  stroke: var(--spore-mint);
+  stroke-width: 1px;
 }
 
 .pixel-bars__off {
   fill: var(--panel-ink);
   opacity: 0.07;
+  transition: opacity var(--t-fast) var(--ease);
 }
 
 .pixel-bars__on {
   fill: var(--spore-periwinkle);
   opacity: 0.5;
+  transition: opacity var(--t-fast) var(--ease), filter var(--t-fast) var(--ease);
 }
 
 .pixel-bars__hit {
   fill: var(--spore-mint);
+  transition: fill var(--t-fast) var(--ease);
 }
 
 /* ---------- Section & view heads ---------- */

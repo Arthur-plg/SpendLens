@@ -1,4 +1,4 @@
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Check } from 'lucide-react';
 import type { Transaction } from '../types';
 import type { CategorySlice, MonthSummary, Period } from '../lib/analytics';
 import { dateLong, dateShort, euros, monthLong, monthShort, percent, plural } from '../lib/format';
@@ -20,6 +20,10 @@ interface OverviewProps {
   onOpenCategory: (categoryId: string) => void;
   onOpenTransactions: () => void;
   onOpenFixed: () => void;
+  onSelectMonth: (monthKey: string) => void;
+  excludedCategories: Set<string>;
+  onToggleCategory: (categoryId: string) => void;
+  onResetExcluded: () => void;
 }
 
 type MonthState = 'average' | 'current' | 'truncated' | 'complete';
@@ -66,7 +70,8 @@ export function Overview(props: OverviewProps) {
       : activeIndex === months.length - 1
         ? 'current'
         : 'truncated';
-  const topAmount = Math.max(slices[0]?.amount ?? 0, 1);
+  const activeSlices = slices.filter((s) => !props.excludedCategories.has(s.id));
+  const topAmount = Math.max(...activeSlices.map((s) => s.amount), 1);
 
   const eyebrow =
     state === 'average'
@@ -90,6 +95,8 @@ export function Overview(props: OverviewProps) {
               values={months.map((m) => m.expenses)}
               activeIndex={activeIndex}
               label={`Dépenses mois par mois, de ${monthLong(months[0].key)} à ${monthLong(months[months.length - 1].key)}`}
+              columnTitles={months.map((m) => `${monthLong(m.key)} : ${euros(m.expenses)} (${m.key === period ? 'mois affiché' : 'cliquer pour afficher ce mois'})`)}
+              onSelectColumn={(col) => props.onSelectMonth(months[col].key)}
             />
             <div className="hero__scale" style={{ width: months.length * (PIXEL_CELL + PIXEL_GAP) - PIXEL_GAP }} aria-hidden="true">
               <span>{monthShort(months[0].key)}</span>
@@ -140,29 +147,72 @@ export function Overview(props: OverviewProps) {
 
       <div className="overview__split">
         <section className="breakdown" aria-label="Répartition des dépenses">
-          <SectionHead title="Où part l’argent" aside={<span className="num">{plural(slices.length, 'catégorie', 'catégories')}</span>} />
+          <SectionHead
+            title="Où part l’argent"
+            aside={
+              <span className="cat-table__aside">
+                {props.excludedCategories.size > 0 ? (
+                  <>
+                    <span className="num">{activeSlices.length}/{slices.length} actives</span>
+                    <button
+                      type="button"
+                      className="cat-table__reset"
+                      onClick={props.onResetExcluded}
+                      title="Réactiver toutes les catégories"
+                    >
+                      Tout inclure
+                    </button>
+                  </>
+                ) : (
+                  <span className="num">{plural(slices.length, 'catégorie', 'catégories')}</span>
+                )}
+              </span>
+            }
+          />
           <ul className="cat-table">
-            {slices.map((s) => (
-              <li key={s.id}>
-                <button type="button" className="cat-row" onClick={() => props.onOpenCategory(s.id)}>
-                  <span className="cat-row__name">
-                    <span className="cat-row__title">
-                      <Swatch color={s.color} />
-                      {s.name}
-                    </span>
-                    <span className="cat-row__sub">
-                      {plural(s.count, 'opération', 'opérations')}
-                      {s.topMerchants.length > 0 && ` · ${s.topMerchants.map((m) => m.name).join(', ')}`}
-                    </span>
-                  </span>
-                  <span className="cat-row__share">
-                    <Bar value={(s.amount / topAmount) * 100} color={s.color} />
-                    <span className="num">{percent(s.share)}</span>
-                  </span>
-                  <span className="cat-row__amount num">{euros(s.amount)}</span>
-                </button>
-              </li>
-            ))}
+            {slices.map((s) => {
+              const isExcluded = props.excludedCategories.has(s.id);
+              return (
+                <li key={s.id} className={`cat-table__item ${isExcluded ? 'cat-table__item--excluded' : ''}`}>
+                  <div className="cat-table__row-wrapper">
+                    <button
+                      type="button"
+                      role="checkbox"
+                      aria-checked={!isExcluded}
+                      aria-label={`${isExcluded ? 'Inclure' : 'Exclure'} la catégorie ${s.name} des calculs`}
+                      title={`${isExcluded ? 'Inclure' : 'Exclure'} des calculs`}
+                      className={`cat-checkbox ${!isExcluded ? 'cat-checkbox--checked' : ''}`}
+                      onClick={() => props.onToggleCategory(s.id)}
+                    >
+                      {!isExcluded && <Check size={12} strokeWidth={3} className="cat-checkbox__icon" />}
+                    </button>
+                    <button
+                      type="button"
+                      className="cat-row"
+                      onClick={() => props.onOpenCategory(s.id)}
+                      title={`Voir les opérations de ${s.name}`}
+                    >
+                      <span className="cat-row__name">
+                        <span className="cat-row__title">
+                          <Swatch color={s.color} />
+                          {s.name}
+                          {isExcluded && <span className="cat-row__excluded-badge">Exclue</span>}
+                        </span>
+                        <span className="cat-row__sub">
+                          {plural(s.count, 'opération', 'opérations')}
+                          {s.topMerchants.length > 0 && ` · ${s.topMerchants.map((m) => m.name).join(', ')}`}
+                        </span>
+                      </span>
+                      <span className="cat-row__share">
+                        <Bar value={isExcluded ? 0 : (s.amount / topAmount) * 100} color={isExcluded ? 'var(--ink-4)' : s.color} />
+                        <span className="num">{isExcluded ? '—' : percent(s.share)}</span>
+                      </span>
+                      <span className="cat-row__amount num">{euros(s.amount)}</span>
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </section>
 
