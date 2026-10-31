@@ -1,4 +1,4 @@
-import { LoaderCircle, Moon, Sun, Tags, Upload } from 'lucide-react';
+import { Download, LoaderCircle, Moon, Sun, Tags, Upload } from 'lucide-react';
 import { Logo } from './Logo';
 import type { Theme } from '../utils/storage';
 import { VIEWS } from '../lib/views';
@@ -14,9 +14,22 @@ interface HeaderProps {
   importing: boolean;
   theme: Theme;
   onToggleTheme: () => void;
+  hasData?: boolean;
+  onExport?: () => void;
 }
 
-export function Header({ view, onViewChange, toClassify, onOpenCategorization, onImport, importing, theme, onToggleTheme }: HeaderProps) {
+export function Header({
+  view,
+  onViewChange,
+  toClassify,
+  onOpenCategorization,
+  onImport,
+  importing,
+  theme,
+  onToggleTheme,
+  hasData,
+  onExport,
+}: HeaderProps) {
   const pending = toClassify ?? 0;
 
   return (
@@ -64,6 +77,18 @@ export function Header({ view, onViewChange, toClassify, onOpenCategorization, o
                 </span>
               )}
             </button>
+            {hasData && onExport && (
+              <button
+                type="button"
+                className="btn btn--outline"
+                onClick={onExport}
+                title="Exporter le rapport des dépenses en PDF"
+                aria-label="Exporter le rapport des dépenses en PDF"
+              >
+                <Download size={16} strokeWidth={1.75} aria-hidden="true" />
+                <span className="hide-sm">Export</span>
+              </button>
+            )}
             <button
               type="button"
               className="btn btn--primary"
