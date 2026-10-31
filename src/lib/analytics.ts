@@ -74,7 +74,7 @@ function daysInMonth(key: string): number {
  * Only applies to transactions in the 'revenus' category (salary, wages).
  * Other income (refunds, gifts, etc.) keeps its real date.
  */
-function budgetMonthKey(t: Transaction): string {
+export function budgetMonthKey(t: Transaction): string {
   if (t.category !== 'revenus') return t.monthKey;
   const day = Number(t.date.slice(8, 10));
   const month = Number(t.date.slice(5, 7));
@@ -152,9 +152,9 @@ export function scopeFor(transactions: Transaction[], months: MonthSummary[], pe
   const real = transactions.filter(isReal);
   if (period === 'avg') {
     const keys = new Set(averageBasis(months).map((m) => m.key));
-    return { items: real.filter((t) => keys.has(t.monthKey)), divisor: Math.max(1, keys.size) };
+    return { items: real.filter((t) => keys.has(budgetMonthKey(t))), divisor: Math.max(1, keys.size) };
   }
-  return { items: real.filter((t) => t.monthKey === period), divisor: 1 };
+  return { items: real.filter((t) => budgetMonthKey(t) === period), divisor: 1 };
 }
 
 export function categoryBreakdown(items: Transaction[], divisor: number): CategorySlice[] {
