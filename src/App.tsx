@@ -23,6 +23,7 @@ import type { Theme } from './utils/storage';
 import {
   averageBasis,
   averageMonth,
+  budgetMonthKey,
   categoryBreakdown,
   classificationStats,
   detectRecurring,
@@ -484,7 +485,7 @@ export function App() {
     });
   }, [stats.unclassified]);
   const periodItems = useMemo(
-    () => (period === 'avg' ? transactions : transactions.filter((t) => t.monthKey === period)),
+    () => (period === 'avg' ? transactions : transactions.filter((t) => budgetMonthKey(t) === period)),
     [transactions, period],
   );
 

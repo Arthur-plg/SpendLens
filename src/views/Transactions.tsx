@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Search, X } from 'lucide-react';
 import type { Transaction } from '../types';
-import { dayLabel, euros, plural } from '../lib/format';
+import { dayLabel, euros, monthLong, monthShort, plural } from '../lib/format';
+import { budgetMonthKey } from '../lib/analytics';
 import { normalize } from '../utils/rules';
 import { DEFAULT_CATEGORIES } from '../utils/categories';
 import { CategorySelect, EmptyState, Segmented } from '../components/ui';
@@ -167,6 +168,14 @@ export function Transactions({ items, filters, onFiltersChange, onCategoryChange
                         {isInternal(t) && (
                           <span className="tag" title="Virement entre vos comptes, exclu des calculs">
                             Interne
+                          </span>
+                        )}
+                        {budgetMonthKey(t) !== t.monthKey && (
+                          <span
+                            className="tag tag--accent"
+                            title={`Revenu perçu le ${t.rawDate || t.date} et rattaché au budget de ${monthLong(budgetMonthKey(t))}`}
+                          >
+                            Budget {monthShort(budgetMonthKey(t), false)}
                           </span>
                         )}
                       </span>
