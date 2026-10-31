@@ -372,6 +372,25 @@ export function App() {
     saveStoredGroqKey(key);
   };
 
+  const handleExportPdf = async () => {
+    try {
+      const { exportExpenseReportPdf } = await import('./lib/pdfReport');
+      exportExpenseReportPdf({
+        transactions,
+        months,
+        average,
+        averageCount,
+        account,
+        firstDate,
+        lastDate,
+      });
+      setToast({ message: 'Rapport des dépenses exporté en PDF.' });
+    } catch (err) {
+      console.error(err);
+      setToast({ message: 'Erreur lors de l’export PDF.', tone: 'error' });
+    }
+  };
+
   const classifyWithAI = async () => {
     if (!apiKey) return;
     setIsClassifying(true);
@@ -659,6 +678,8 @@ export function App() {
         importing={importing}
         theme={theme}
         onToggleTheme={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
+        hasData={status === 'ready' && transactions.length > 0}
+        onExport={handleExportPdf}
       />
 
       <main id="main" className="main" tabIndex={-1}>
